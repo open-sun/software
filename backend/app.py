@@ -92,5 +92,30 @@ def getusers():
     return jsonify(user_list), 200
 
 
+@app.route("/api/updateuserrole/<int:user_id>", methods=["PUT"])
+def update_user_role(user_id):
+    try:
+        # 获取请求数据
+        data = request.get_json()
+        new_role = data.get('role')
+
+        # 这里添加你的业务逻辑（示例）
+        # 例如更新数据库中的用户角色
+        user = User.query.get(user_id)
+        user.role = new_role
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": f"用户 {user_id} 角色已更新为 {new_role}"
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
 if __name__ == '__main__':
     app.run()
