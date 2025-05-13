@@ -16,7 +16,7 @@ HOSTNAME = "127.0.0.1"
 PORT = "3306"
 DATABASE = "flask"
 USERNAME = "root"
-PASSWORD = "srx19980201"
+PASSWORD = ""
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}:{PORT}/{DATABASE}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -82,6 +82,14 @@ def login():
 
     # 登录成功
     return jsonify({"ok": True, "message": "登录成功", "role": user.role}), 200
+
+
+
+@app.route("/api/getusers", methods=["GET"])
+def getusers():
+    users = User.query.all()
+    user_list = [{"id": user.id, "username": user.username, "role": user.role} for user in users]
+    return jsonify(user_list), 200
 
 
 if __name__ == '__main__':

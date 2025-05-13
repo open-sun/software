@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import {register}  from "../components/axioxapi"; // 导入注册函数
+import {register}  from "../services/loginandre"; // 导入注册函数
 import { loginSuccess } from "../components/AuthContext";
 import { useDispatch } from "react-redux";
 

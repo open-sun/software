@@ -5,6 +5,7 @@ import Header from './components/Header'
 import Login from './pages/login'
 import Register from './pages/register'
 import MainInfo from './pages/maininfo'
+import Management from './pages/management';
 
 const App: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/maininfo" element={<MainInfo />} />
+            <Route path="/management" element={<Management />} />
         </Routes>
     </Router>
   );

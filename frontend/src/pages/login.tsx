@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../components/AuthContext";
-import {login}  from "../components/axioxapi"; // 导入注册函数
+import {login}  from "../services/loginandre"; // 导入注册函数
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
