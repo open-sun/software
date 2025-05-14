@@ -5,7 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash  # 添
 from flask_cors import CORS
 from models import db, User
 
-
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import os
+import json
 
 
 app = Flask(__name__)
@@ -28,6 +31,36 @@ with app.app_context():
     db.drop_all()
     # 2. 根据模型重新创建所有表
     db.create_all()
+
+# 假设你的数据文件目录是 backend/data/水质数据/
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data', '水质数据')
+
+@app.route('/api/waterdata', methods=['GET'])
+def get_water_data():
+    # 通过查询参数指定日期，如 ?date=2021-01-01
+    date = request.args.get('date')
+    if not date:
+        return jsonify({"error": "Missing 'date' query parameter"}), 400
+
+    # 组装文件路径
+    date_parts = date.split("-")
+    if len(date_parts) != 3:
+        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+
+    folder_name = f"{date_parts[0]}-{date_parts[1]}"
+    file_name = f"{date}.json"
+    file_path = os.path.join(DATA_DIR, folder_name, file_name)
+
+    if not os.path.exists(file_path):
+        return jsonify({"error": f"Data file for {date} not found"}), 404
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 @app.route("/api/register", methods=["POST"])

@@ -87,7 +87,15 @@ const Header: React.FC = () => {
             管理中心
             </Button>
           )}
-
+          {isAuthenticated && (
+            <Button 
+              component={Link} 
+              to="/WaterDataViewer" 
+              sx={{ color: 'white' }}
+            >
+              测试
+            </Button>
+          )}
         </Box>
         <Box 
           sx={{ 
