@@ -25,6 +25,23 @@ export const getWaterDataByName = async (
   }
 };
 
+/**
+ * 获取指定日期的视频数据
+ * @param date - 日期 (YYYY-MM-DD)
+ */
+export const getVideosByDate = async (date: string) => {
+  try {
+    const response = await axiosInstance.get('/api/videos', {
+      params: { date },
+    });
+    return response.data.videos;
+  } catch (error) {
+    console.error('Failed to fetch videos:', error);
+    throw error;
+  }
+};
+
+
 export const getMapData = async (mapName: string) => {
   try {
     const response = await axiosInstance.get(`/data/${mapName}.json`);
