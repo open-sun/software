@@ -1,12 +1,14 @@
 #!/bin/bash
 
 # ==============================
-# Node.js v22.12.0 and npm v10.9.0 Installation Script with Version Check
+# Node.js v22.12.0 and npm v10.9.0 Installation Script with Backend Configuration
 # ==============================
 
 # 目标版本
 TARGET_NODE_VERSION="v22.12.0"
 TARGET_NPM_VERSION="10.9.0"
+BACKEND_DIR="backend"
+VENV_DIR="${BACKEND_DIR}/.venv"
 
 echo "Node.js v22.12.0 和 npm v10.9.0 安装脚本"
 echo "=============================="
@@ -77,3 +79,56 @@ fi
 # 最终版本检查
 echo "当前 Node.js 版本：$(node -v)"
 echo "当前 npm 版本：$(npm -v)"
+
+# ==============================
+# 后端 Python 环境配置
+# ==============================
+echo "=============================="
+echo "开始配置后端 Python 环境..."
+
+# 检查 backend 目录是否存在
+if [ ! -d "$BACKEND_DIR" ]; then
+  echo "后端目录 $BACKEND_DIR 不存在，跳过配置。"
+else
+  cd $BACKEND_DIR
+
+  # 检查 Python 环境
+  if command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+  elif command -v python &> /dev/null; then
+    PYTHON_CMD="python"
+  else
+    echo "Python 未安装，请先安装 Python。"
+    exit 1
+  fi
+
+  echo "使用 Python 命令：$PYTHON_CMD"
+
+  # 创建虚拟环境
+  if [ ! -d "$VENV_DIR" ]; then
+    echo "创建 Python 虚拟环境：$VENV_DIR"
+    $PYTHON_CMD -m venv .venv
+  else
+    echo "虚拟环境已存在，跳过创建。"
+  fi
+
+  # 激活虚拟环境
+  source .venv/bin/activate
+
+  # 检查 requirements.txt 是否存在
+  if [ -f "requirements.txt" ]; then
+    echo "安装 requirements.txt 中的依赖..."
+    pip install -r requirements.txt
+  else
+    echo "未找到 requirements.txt，跳过依赖安装。"
+  fi
+
+  # 退出虚拟环境
+  deactivate
+
+  # 返回项目根目录
+  cd $ROOT_DIR
+fi
+
+echo "后端 Python 环境配置完成。"
+echo "=============================="
