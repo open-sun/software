@@ -26,7 +26,7 @@ echarts.use([
   CanvasRenderer
 ]);
 
-const UsaPopulationMap: React.FC = () => {
+const MapTest: React.FC = () => {
   const [option, setOption] = useState<echarts.EChartsCoreOption | null>(null);
 
   useEffect(() => {
@@ -111,4 +111,4 @@ const UsaPopulationMap: React.FC = () => {
   );
 };
 
-export default UsaPopulationMap;
+export default MapTest;
