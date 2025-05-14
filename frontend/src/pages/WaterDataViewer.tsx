@@ -21,7 +21,7 @@ const WaterDataViewer: React.FC = () => {
     <div>
       <h2>水质数据展示</h2>
 
-      {/* 时间相关的水质数据
+      {/* 时间相关的水质数据 */}
       <section>
         <h3>时间相关水质数据</h3>
         {timeWaterData ? (
@@ -29,9 +29,9 @@ const WaterDataViewer: React.FC = () => {
         ) : (
           <p>正在加载时间相关数据...</p>
         )}
-      </section> */}
+      </section>
 
-      {/* 站点相关的水质数据 */}
+      {/* 站点相关的水质数据
       <section>
         <h3>白山大桥（吉林省/松花江流域）水质数据</h3>
         {siteWaterData ? (
@@ -56,7 +56,7 @@ const WaterDataViewer: React.FC = () => {
         ) : (
           <p>正在加载站点相关数据...</p>
         )}
-      </section>
+      </section> */}
     </div>
   );
 };

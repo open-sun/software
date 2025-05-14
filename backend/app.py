@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash  # 添
 from flask_cors import CORS
 from models import db, User
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request,send_from_directory
 from flask_cors import CORS
 import os
 import json
@@ -31,7 +31,9 @@ with app.app_context():
     db.drop_all()
     # 2. 根据模型重新创建所有表
     db.create_all()
-
+@app.route('/data/<path:filename>')
+def serve_data(filename):
+    return send_from_directory('data', filename)
 # 假设你的数据文件目录是 backend/data/水质数据/
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data', '水质数据')
 

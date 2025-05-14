@@ -7,6 +7,7 @@ import Register from './pages/register'
 import MainInfo from './pages/maininfo'
 import Management from './pages/management';
 import WaterDataViewer from './pages/WaterDataViewer';
+import UsaPopulationMap from './pages/UsaPopulationMap';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
             <Route path="/maininfo" element={<MainInfo />} />
             <Route path="/management" element={<Management />} />
             <Route path="/WaterDataViewer" element={<WaterDataViewer />} />
+            <Route path="/UsaPopulationMap" element={<UsaPopulationMap />} />
         </Routes>
     </Router>
   );

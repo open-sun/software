@@ -24,3 +24,13 @@ export const getWaterDataByName = async (
     throw error;
   }
 };
+
+export const getMapData = async (mapName: string) => {
+  try {
+    const response = await axiosInstance.get(`/data/${mapName}.json`);
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to fetch map data for ${mapName}:`, error);
+    throw error;
+  }
+};
