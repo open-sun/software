@@ -1,17 +1,35 @@
 ## 安装依赖
-后端进入目录后，执行以下命令安装依赖：
+前后端环境配置，根目录下运行
 ```bash
-pip install -r requirements.txt
+./setup.sh
 ```
-前端
+
+
+# 前后端启动
+
+一键启动前后端，根目录下运行
 ```bash
-npm install
+./start.sh
 ```
-## 启动后端
+
+## 单独启动后端
+
+
+backend目录下
 ```bash
 python app.py
 ```
-## 启动前端
+
+
+
+## 单独启动前端
+
+有包更改时运行，frontend目录下
+```bash
+npm install
+```
+
+正常启动
 ```bash
 npm start
 ```
