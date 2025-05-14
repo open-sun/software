@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { getWaterData } from '../services/DataGet';
+import { getTimeWaterData } from '../services/DataGet';
 
 const WaterDataViewer: React.FC = () => {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    getWaterData('2021-01-01').then(setData).catch(console.error);
+    getTimeWaterData('2021-01-01').then(setData).catch(console.error);
   }, []);
 
   return (

@@ -35,8 +35,8 @@ with app.app_context():
 # 假设你的数据文件目录是 backend/data/水质数据/
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data', '水质数据')
 
-@app.route('/api/waterdata', methods=['GET'])
-def get_water_data():
+@app.route('/api/TimeWaterData', methods=['GET'])
+def get_time_water_data():
     # 通过查询参数指定日期，如 ?date=2021-01-01
     date = request.args.get('date')
     if not date:
