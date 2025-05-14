@@ -9,7 +9,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 import json
-
+import csv
 
 app = Flask(__name__)
 CORS(app)
@@ -61,7 +61,36 @@ def get_time_water_data():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# CSV 文件目录
+BASE_DIR = os.path.join(os.path.dirname(__file__), 'data', '水质数据', 'water_quality_by_name')
 
+@app.route('/api/waterdata_by_name', methods=['GET'])
+def get_water_data_by_name():
+    province = request.args.get('province')
+    basin = request.args.get('basin')
+    site = request.args.get('site')
+
+    if not province or not basin or not site:
+        return jsonify({"error": "Missing query parameters. Required: province, basin, site"}), 400
+
+    # 构造 CSV 文件路径
+    file_path = os.path.join(BASE_DIR, province, basin, site, '2021-04', f'{site}.csv')
+
+    if not os.path.exists(file_path):
+        return jsonify({"error": "Data file not found"}), 404
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            rows = list(reader)
+        return jsonify({
+            "result": 1,
+            "total": len(rows),
+            "thead": reader.fieldnames,
+            "tbody": rows
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/register", methods=["POST"])
 def register():
