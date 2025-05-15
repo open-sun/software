@@ -25,6 +25,16 @@ const LineAreaChart: React.FC<LineAreaChartProps> = ({
       return [date.getTime(), value as number];
     });
 
+    // 自动计算y轴范围和间隔，提升精度
+    const values = chartData.map(item => item[1]);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const range = maxValue - minValue;
+    const padding = range === 0 ? Math.max(1, minValue * 0.05) : range * 0.05;
+    const yMin = Math.floor(minValue - padding);
+    const yMax = Math.ceil(maxValue + padding);
+    const interval = range === 0 ? 1 : Math.max(1, Math.round((yMax - yMin) / 5));
+
     setOption({
       tooltip: {
         trigger: 'axis',
@@ -49,8 +59,11 @@ const LineAreaChart: React.FC<LineAreaChartProps> = ({
       },
       yAxis: {
         type: 'value',
-        boundaryGap: [0, '100%'],
-        name: yName
+        boundaryGap: [0, 0],
+        name: yName,
+        min: yMin,
+        max: yMax,
+        interval: interval
       },
       dataZoom: [
         { type: 'inside', start: 0, end: 100 },
