@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts/core';
+import LineAreaChart from '../components/LineAreaChart';
 import {
   TitleComponent,
   TooltipComponent,
@@ -325,10 +326,23 @@ const onChartClick = async (params: any) => {
               ))}
             </tbody>
           </table> */}
-{/* 只展示监测时间和所选指标列 */}
 {filteredFile && selectedColumn && (
   <div>
     <h4>监测时间与 {selectedColumn}</h4>
+
+    {/* 折线图部分 */}
+    <LineAreaChart
+      data={
+        filteredFile.tbody
+          .filter((row: any) => row['监测时间'] && !isNaN(Number(row[selectedColumn])))
+          .map((row: any) => [row['监测时间'], Number(row[selectedColumn])])
+      }
+      title={`${selectedColumn} 随时间变化`}
+      yName={selectedColumn}
+      seriesName={selectedColumn}
+    />
+
+    {/* 表格部分
     <table>
       <thead>
         <tr>
@@ -344,7 +358,7 @@ const onChartClick = async (params: any) => {
           </tr>
         ))}
       </tbody>
-    </table>
+    </table> */}
   </div>
 )}        </div>
       ) : (
