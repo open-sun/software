@@ -28,6 +28,7 @@ echarts.use([
 ]);
 
 // 统一样式对象
+// 统一样式对象
 const styles = {
   overlay: {
     position: 'fixed' as const,
@@ -35,27 +36,45 @@ const styles = {
     left: 0,
     width: '100vw',
     height: '100vh',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     zIndex: 999,
+    transition: 'background-color 0.3s',
+    backdropFilter: 'blur(2px)',
   },
   modal: {
     position: 'fixed' as const,
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    backgroundColor: 'white',
-    padding: '20px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+    backgroundColor: '#fff',
+    padding: '32px 28px 24px 28px',
+    borderRadius: '14px',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.18), 0 1.5px 6px rgba(0,0,0,0.08)',
     zIndex: 1000,
     maxHeight: '80vh',
     overflowY: 'auto' as const,
-    width: '80%',
+    width: '90%',
+    maxWidth: 700,
+    minWidth: 320,
+    fontFamily: 'Segoe UI, Arial, sans-serif',
+    color: '#222',
   },
   selectGroup: {
-    marginBottom: 16,
+    marginBottom: 20,
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    alignItems: 'center',
+    gap: '18px',
   },
   select: {
-    marginRight: 16,
+    marginRight: 12,
+    padding: '6px 12px',
+    borderRadius: '6px',
+    border: '1px solid #b0b0b0',
+    fontSize: '15px',
+    background: '#f8fafd',
+    outline: 'none',
+    transition: 'border-color 0.2s',
   },
 };
 
@@ -296,6 +315,7 @@ const MapTest: React.FC = () => {
                 <select
                   value={selectedColumn}
                   onChange={e => setSelectedColumn(e.target.value)}
+                  style={styles.select}
                 >
                   {columnOptions.map((col: string) => (
                     <option key={col} value={col}>{col}</option>
@@ -325,7 +345,6 @@ const MapTest: React.FC = () => {
             ) : (
               <div>未找到对应文件</div>
             )}
-            <button onClick={() => setModalVisible(false)}>关闭</button>
           </div>
         </>
       )}
