@@ -158,59 +158,69 @@ const MapTest: React.FC = () => {
         echarts.registerMap('china', usaGeoJson);
         // const projection = d3.geoAlbersUsa(); // 未用到可移除
 
-        const chartOption: echarts.EChartsCoreOption = {
-          title: {
-            text: '',
-            subtext: '',
-            sublink: '',
-            left: 'right'
-          },
-          tooltip: {
-            trigger: 'item',
-            showDelay: 0,
-            transitionDuration: 0.2
-          },
-          visualMap: {
-            left: 'right',
-            min: 500000,
-            max: 38000000,
-            inRange: {
-              color: [
-                '#313695', '#4575b4', '#74add1', '#abd9e9',
-                '#e0f3f8', '#ffffbf', '#fee090', '#fdae61',
-                '#f46d43', '#d73027', '#a50026'
-              ]
-            },
-            text: ['High', 'Low'],
-            calculable: true
-          },
-          toolbox: {
-            show: true,
-            left: 'left',
-            top: 'top',
-            feature: {
-              dataView: { readOnly: false },
-              restore: {},
-              saveAsImage: {}
-            }
-          },
-          series: [
-            {
-              name: 'china PopEstimates',
-              type: 'map',
-              map: 'china',
-              emphasis: {
-                label: {
-                  show: true
-                }
-              },
-              data: [
-                { name: '辽宁省', value: 4822023 }
-              ]
-            }
-          ]
-        };
-
+const chartOption: echarts.EChartsCoreOption = {
+  title: {
+    text: '',
+    left: 'right'
+  },
+  tooltip: {
+    trigger: 'item',
+    showDelay: 0,
+    transitionDuration: 0.2
+  },
+  visualMap: {
+    left: 'right',
+    min: 500000,
+    max: 38000000,
+    inRange: {
+      color: [
+        '#e0f3f8', '#abd9e9', '#74add1', '#4575b4',
+        '#313695', '#fee090', '#fdae61', '#f46d43', '#d73027'
+      ]
+    },
+    text: ['高', '低'],
+    calculable: true
+  },
+  toolbox: {
+    show: true,
+    left: 'left',
+    top: 'top',
+    feature: {
+      dataView: { readOnly: false },
+      restore: {},
+      saveAsImage: {}
+    }
+  },
+  series: [
+    {
+      name: 'china PopEstimates',
+      type: 'map',
+      map: 'china',
+      roam: true, // 支持缩放和拖拽
+      zoom: 1.2,  // 默认放大
+      itemStyle: {
+        borderColor: '#666',
+        borderWidth: 1.2,
+        areaColor: '#f5faff'
+      },
+      emphasis: {
+        label: {
+          show: true,
+          color: '#222',
+          fontWeight: 'bold'
+        },
+        itemStyle: {
+          areaColor: '#ffe082',
+          borderColor: '#ff9800',
+          borderWidth: 2
+        }
+      },
+      data: [
+        // ...你的数据
+      ]
+    }
+  ]
+};
         setOption(chartOption);
       } catch (error) {
         console.error('地图加载失败：', error);
