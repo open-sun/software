@@ -11,7 +11,7 @@ import {
 } from 'echarts/components';
 import { MapChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
-import { getMapData } from '../services/DataGet';
+import { getJsonData } from '../services/DataGet';
 import * as d3 from 'd3-geo';
 
 // 注册 echarts 组件
@@ -33,7 +33,7 @@ const MapTest: React.FC = () => {
     const fetchData = async () => {
       try {
         // 使用封装的服务获取地图数据
-        const usaGeoJson = await getMapData('china');
+        const usaGeoJson = await getJsonData('china');
 
         echarts.registerMap('china', usaGeoJson);
         const projection = d3.geoAlbersUsa();
