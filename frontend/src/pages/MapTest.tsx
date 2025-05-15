@@ -34,8 +34,27 @@ const MapTest: React.FC = () => {
   const [selectedSite, setSelectedSite] = useState<string>('');
   const [filteredFile, setFilteredFile] = useState<any>(null);
 
+const [selectedColumn, setSelectedColumn] = useState<string>('');
 
-// 获取所有流域
+// 获取可选的指标列（排除指定字段）
+const columnOptions = React.useMemo(() => {
+  if (!filteredFile || !filteredFile.thead) return [];
+  return filteredFile.thead.filter(
+    (col: string) =>
+      !['省份', '流域', '断面名称', '监测时间'].includes(col)
+  );
+}, [filteredFile]);
+
+// 当 columnOptions 变化时，优先保留上次选择的 selectedColumn
+useEffect(() => {
+  if (columnOptions.length === 0) {
+    setSelectedColumn('');
+  } else if (!columnOptions.includes(selectedColumn)) {
+    setSelectedColumn(columnOptions[0]);
+  }
+  // 如果当前 selectedColumn 还在 options 里，则不变
+  // 否则自动选第一个
+}, [columnOptions]);// 获取所有流域
 const basins = React.useMemo(() => {
   if (!modalData || !modalData.files) return [];
   return Array.from(new Set(modalData.files.flatMap((f: any) =>
@@ -203,6 +222,21 @@ const onChartClick = async (params: any) => {
       }}
       onClick={() => setModalVisible(false)}
     />
+{modalVisible && (
+  <>
+    {/* 遮罩层 */}
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        zIndex: 999,
+      }}
+      onClick={() => setModalVisible(false)}
+    />
     {/* 模态框 */}
     <div
       style={{
@@ -218,7 +252,7 @@ const onChartClick = async (params: any) => {
         overflowY: 'auto',
         width: '80%',
       }}
-      onClick={e => e.stopPropagation()} // 阻止点击模态框内容时关闭
+      onClick={e => e.stopPropagation()}
     >
       <h3>水质数据</h3>
       {/* 下拉框选择 */}
@@ -250,9 +284,21 @@ const onChartClick = async (params: any) => {
           <select
             value={selectedSite}
             onChange={e => setSelectedSite(e.target.value)}
+            style={{ marginRight: 16 }}
           >
             {sites.map((site) => (
               <option key={String(site)} value={String(site)}>{String(site)}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          指标列：
+          <select
+            value={selectedColumn}
+            onChange={e => setSelectedColumn(e.target.value)}
+          >
+            {columnOptions.map((col: string) => (
+              <option key={col} value={col}>{col}</option>
             ))}
           </select>
         </label>
@@ -260,7 +306,7 @@ const onChartClick = async (params: any) => {
       {/* 展示对应文件内容 */}
       {filteredFile ? (
         <div>
-          <h4>{filteredFile.file}</h4>
+          {/* <h4>{filteredFile.file}</h4>
           <table>
             <thead>
               <tr>
@@ -278,13 +324,36 @@ const onChartClick = async (params: any) => {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </table> */}
+{/* 只展示监测时间和所选指标列 */}
+{filteredFile && selectedColumn && (
+  <div>
+    <h4>监测时间与 {selectedColumn}</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>监测时间</th>
+          <th>{selectedColumn}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {filteredFile.tbody.map((row: any, idx: number) => (
+          <tr key={idx}>
+            <td>{row['监测时间']}</td>
+            <td>{row[selectedColumn]}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}        </div>
       ) : (
         <div>未找到对应文件</div>
       )}
       <button onClick={() => setModalVisible(false)}>关闭</button>
     </div>
+  </>
+)}
   </>
 )}
     </div>
