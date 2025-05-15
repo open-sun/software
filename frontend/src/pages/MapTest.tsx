@@ -30,7 +30,52 @@ const MapTest: React.FC = () => {
   const [option, setOption] = useState<echarts.EChartsCoreOption | null>(null);
   const [modalVisible, setModalVisible] = useState(false); // 控制模态框显示
   const [modalData, setModalData] = useState<any>(null); // 存储模态框数据
+  const [selectedBasin, setSelectedBasin] = useState<string>('');
+  const [selectedSite, setSelectedSite] = useState<string>('');
+  const [filteredFile, setFilteredFile] = useState<any>(null);
 
+
+// 获取所有流域
+const basins = React.useMemo(() => {
+  if (!modalData || !modalData.files) return [];
+  return Array.from(new Set(modalData.files.flatMap((f: any) =>
+    f.tbody.map((row: any) => row['流域'])
+  )));
+}, [modalData]);
+
+// 获取当前流域下的断面名称
+const sites = React.useMemo(() => {
+  if (!modalData || !modalData.files || !selectedBasin) return [];
+  return Array.from(new Set(
+    modalData.files.flatMap((f: any) =>
+      f.tbody.filter((row: any) => row['流域'] === selectedBasin)
+        .map((row: any) => row['断面名称'])
+    )
+  ));
+}, [modalData, selectedBasin]);
+
+// 监听modalData和下拉框变化，自动设置默认选项
+useEffect(() => {
+  if (basins.length > 0 && !selectedBasin) setSelectedBasin(String(basins[0]));
+}, [basins]);
+useEffect(() => {
+  if (sites.length > 0 && !selectedSite) setSelectedSite(String(sites[0]));
+  // 如果切换流域后，当前断面不在新流域下，重置断面
+  if (selectedSite && sites.length > 0 && !sites.includes(selectedSite)) {
+    setSelectedSite(String(sites[0]));
+  }
+}, [sites]);
+useEffect(() => {
+  if (!modalData || !modalData.files || !selectedBasin || !selectedSite) {
+    setFilteredFile(null);
+    return;
+  }
+  // 查找路径中同时包含流域和断面名称的文件
+  const file = modalData.files.find((f: any) =>
+    f.path.includes(selectedBasin) && f.path.includes(selectedSite)
+  );
+  setFilteredFile(file || null);
+}, [modalData, selectedBasin, selectedSite]);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -103,19 +148,31 @@ const MapTest: React.FC = () => {
   }, []);
 
   // 定义事件处理函数
-  const onChartClick = async (params: any) => {
-    console.log('点击位置的名字:', params.name); // 打印点击位置的名字
+const onChartClick = async (params: any) => {
+  try {
+    const data = await getWaterDataByName(params.name, '', '');
+    setModalData(data);
 
-    try {
-      // 调用 getWaterDataByName 获取数据
-      const data = await getWaterDataByName(params.name, '', '');
-      setModalData(data); // 设置模态框数据
-      setModalVisible(true); // 显示模态框
-    } catch (error) {
-      console.error('获取水质数据失败:', error);
-    }
-  };
+    // 立即初始化流域和断面名称
+    const allBasins = Array.from(new Set(
+      data.files.flatMap((f: any) => f.tbody.map((row: any) => row['流域']))
+    ));
+    const firstBasin = allBasins[0] || '';
+    setSelectedBasin(String(firstBasin));
 
+    const allSites = Array.from(new Set(
+      data.files.flatMap((f: any) =>
+        f.tbody.filter((row: any) => row['流域'] === firstBasin)
+          .map((row: any) => row['断面名称'])
+      )
+    ));
+    setSelectedSite(String(allSites[0]) || '');
+
+    setModalVisible(true);
+  } catch (error) {
+    console.error('获取水质数据失败:', error);
+  }
+};
   return (
     <div style={{ height: '100vh', width: '100%' }}>
       {option ? (
@@ -131,27 +188,104 @@ const MapTest: React.FC = () => {
       )}
 
 
-{/* 模态框 */}
 {modalVisible && (
-  <div
-    style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      backgroundColor: 'white',
-      padding: '20px',
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-      zIndex: 1000,
-      maxHeight: '80vh', // 设置模态框的最大高度
-      overflowY: 'auto', // 启用垂直滚动
-      width: '80%', // 可选：设置模态框宽度
-    }}
-  >
-    <h3>水质数据</h3>
-    <pre>{JSON.stringify(modalData, null, 2)}</pre>
-    <button onClick={() => setModalVisible(false)}>关闭</button>
-  </div>
+  <>
+    {/* 遮罩层 */}
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        zIndex: 999,
+      }}
+      onClick={() => setModalVisible(false)}
+    />
+    {/* 模态框 */}
+    <div
+      style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: 'white',
+        padding: '20px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+        zIndex: 1000,
+        maxHeight: '80vh',
+        overflowY: 'auto',
+        width: '80%',
+      }}
+      onClick={e => e.stopPropagation()} // 阻止点击模态框内容时关闭
+    >
+      <h3>水质数据</h3>
+      {/* 下拉框选择 */}
+      <div style={{ marginBottom: 16 }}>
+        <label>
+          流域：
+          <select
+            value={selectedBasin}
+            onChange={e => {
+              const newBasin = e.target.value;
+              setSelectedBasin(newBasin);
+              const newSites = Array.from(new Set(
+                modalData.files.flatMap((f: any) =>
+                  f.tbody.filter((row: any) => row['流域'] === newBasin)
+                    .map((row: any) => row['断面名称'])
+                )
+              ));
+              setSelectedSite(String(newSites[0] || ''));
+            }}
+            style={{ marginRight: 16 }}
+          >
+            {basins.map((basin) => (
+              <option key={String(basin)} value={String(basin)}>{String(basin)}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          断面名称：
+          <select
+            value={selectedSite}
+            onChange={e => setSelectedSite(e.target.value)}
+          >
+            {sites.map((site) => (
+              <option key={String(site)} value={String(site)}>{String(site)}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {/* 展示对应文件内容 */}
+      {filteredFile ? (
+        <div>
+          <h4>{filteredFile.file}</h4>
+          <table>
+            <thead>
+              <tr>
+                {filteredFile.thead.map((col: string, idx: number) => (
+                  <th key={idx}>{col}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredFile.tbody.map((row: any, rowIdx: number) => (
+                <tr key={rowIdx}>
+                  {filteredFile.thead.map((col: string) => (
+                    <td key={col}>{row[col]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div>未找到对应文件</div>
+      )}
+      <button onClick={() => setModalVisible(false)}>关闭</button>
+    </div>
+  </>
 )}
     </div>
   );
