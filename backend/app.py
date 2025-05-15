@@ -34,8 +34,8 @@ with app.app_context():
 @app.route('/data/<path:filename>')
 def serve_data(filename):
     return send_from_directory('data', filename)
-# 假设你的数据文件目录是 backend/data/水质数据/
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data', '水质数据')
+# 假设你的数据文件目录是 backend/data/WaterQualitybyDate/
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data', 'WaterQualitybyDate')
 
 @app.route('/api/TimeWaterData', methods=['GET'])
 def get_time_water_data():
@@ -64,7 +64,7 @@ def get_time_water_data():
         return jsonify({"error": str(e)}), 500
 
 # CSV 文件目录
-BASE_DIR = os.path.join(os.path.dirname(__file__), 'data', '水质数据', 'water_quality_by_name')
+BASE_DIR = os.path.join(os.path.dirname(__file__), 'data', 'WaterQualitybyDate', 'water_quality_by_name')
 
 @app.route('/api/waterdata_by_name', methods=['GET'])
 def get_water_data_by_name():
