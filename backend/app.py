@@ -72,11 +72,37 @@ def get_water_data_by_name():
     basin = request.args.get('basin')
     site = request.args.get('site')
 
-    if not province or not basin or not site:
-        return jsonify({"error": "Missing query parameters. Required: province, basin, site"}), 400
+    if not province:
+        return jsonify({"error": "Missing query parameter: province"}), 400
 
-    # 构造 CSV 文件路径
-    file_path = os.path.join(BASE_DIR, province, basin, site, '2021-04', f'{site}.csv')
+    # 构造基础目录路径
+    base_path = os.path.join(BASE_DIR, province)
+
+    # 如果 basin 或 site 为空，遍历目录
+    if not basin or not site:
+        try:
+            results = []
+            # 遍历指定目录下的所有 CSV 文件
+            for root, _, files in os.walk(base_path):
+                for file in files:
+                    if file.endswith('.csv'):
+                        file_path = os.path.join(root, file)
+                        with open(file_path, 'r', encoding='utf-8') as csvfile:
+                            reader = csv.DictReader(csvfile)
+                            rows = list(reader)
+                            results.append({
+                                "file": file,
+                                "path": file_path,
+                                "total": len(rows),
+                                "thead": reader.fieldnames,
+                                "tbody": rows
+                            })
+            return jsonify({"result": 1, "files": results}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    # 如果 basin 和 site 都不为空，构造具体文件路径
+    file_path = os.path.join(base_path, basin, site, '2021-04', f'{site}.csv')
 
     if not os.path.exists(file_path):
         return jsonify({"error": "Data file not found"}), 404
@@ -92,8 +118,7 @@ def get_water_data_by_name():
             "tbody": rows
         })
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
+        return jsonify({"error": str(e)}), 500    
 
 # videos文件目录
 VIDEO_DIR = os.path.join(os.path.dirname(__file__), 'data', 'videos')
