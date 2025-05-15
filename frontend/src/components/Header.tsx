@@ -96,6 +96,16 @@ const Header: React.FC = () => {
               测试
             </Button>
           )}
+          {isAuthenticated && (
+            <Button 
+              component={Link} 
+              to="/MapTest" 
+              sx={{ color: 'white' }}
+            >
+              地图
+            </Button>
+          )}
+
         </Box>
         <Box 
           sx={{ 
