@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Row, Col, Card, Tabs, Spin, Alert, Typography, Empty, Button } from 'antd';
 import { getWeatherData } from '../services/weatherService';
+import { getMarketData,  MarketData, MarketQueryParams } from '../services/marketService';
 import WeatherCard from '../components/WeatherCard';
 import HoverRainfallChart from '../components/HoverRainfallChart';
-import { ReloadOutlined, CloudOutlined } from '@ant-design/icons';
+import MarketDataTable from '../components/MarketDataTable';
+import { ReloadOutlined, CloudOutlined, ShoppingOutlined, LineChartOutlined } from '@ant-design/icons';
 
 const { Content } = Layout;
 const { TabPane } = Tabs;
@@ -44,15 +46,24 @@ interface CityWeatherMap {
 
 const Datacenter: React.FC = () => {
   const [weatherData, setWeatherData] = useState<CityWeatherMap>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [marketData, setMarketData] = useState<MarketData[]>([]);
+  const [weatherLoading, setWeatherLoading] = useState(true);
+  const [marketLoading, setMarketLoading] = useState(true);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+  const [marketError, setMarketError] = useState<string | null>(null);
   const [dataConsistencyIssue, setDataConsistencyIssue] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTabKey, setActiveTabKey] = useState('weather');
+  
+  // 移除以下市场价格趋势相关状态
+  // const [trendLoading, setTrendLoading] = useState(false);
+  // const [selectedProduct, setSelectedProduct] = useState<string>('');
+  // const [selectedSpec, setSelectedSpec] = useState<string>('');
+  // const [specOptions, setSpecOptions] = useState<string[]>([]);
 
   const fetchAllCitiesWeather = async () => {
     try {
-      setError(null);
+      setWeatherError(null);
       setRefreshing(true);
       console.log('开始获取天气数据...');
       
@@ -139,28 +150,105 @@ const Datacenter: React.FC = () => {
       setWeatherData(weatherMap);
     } catch (error) {
       console.error('获取天气数据失败:', error);
-      setError('获取天气数据失败，请稍后再试');
+      setWeatherError('获取天气数据失败，请稍后再试');
     } finally {
-      setLoading(false);
+      setWeatherLoading(false);
       setRefreshing(false);
     }
   };
 
+  const fetchMarketData = async (params: MarketQueryParams = {}) => {
+    try {
+      setMarketLoading(true);
+      setMarketError(null);
+      
+      // 尝试获取数据
+      let retryCount = 0;
+      let result;
+      
+      // 最多尝试3次
+      while (retryCount < 3) {
+        try {
+          result = await getMarketData(params);
+          
+          // 如果成功获取到数据并且list不为空，跳出循环
+          if (result && result.list && result.list.length > 0) {
+            break;
+          }
+          
+          // 如果没有获取到数据，等待一段时间后重试
+          console.log(`未获取到市场数据，第${retryCount + 1}次重试中...`);
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 等待1秒
+          retryCount++;
+        } catch (error) {
+          console.error(`第${retryCount + 1}次获取市场数据失败:`, error);
+          retryCount++;
+          
+          // 最后一次尝试失败，抛出异常
+          if (retryCount >= 3) {
+            throw error;
+          }
+          
+          // 等待后重试
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 等待1秒
+        }
+      }
+      
+      if (result && result.list) {
+        if (result.list.length === 0) {
+          setMarketError('没有获取到市场数据，请稍后再试');
+        } else {
+          setMarketData(result.list);
+          console.log(`成功获取到${result.list.length}条市场数据`);
+        }
+      } else {
+        setMarketError('市场数据格式异常，请检查接口');
+        setMarketData([]);
+      }
+    } catch (error) {
+      console.error('获取市场数据失败:', error);
+      setMarketError('获取市场数据失败，请稍后再试');
+      setMarketData([]);
+    } finally {
+      setMarketLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchAllCitiesWeather();
-  }, []);
+    if (activeTabKey === 'weather') {
+      fetchAllCitiesWeather();
+    } else if (activeTabKey === 'market') {
+      fetchMarketData();
+    }
+  }, [activeTabKey]);
   
-  const handleRefresh = () => {
-    setLoading(true);
+  const handleRefreshWeather = () => {
+    setWeatherLoading(true);
     fetchAllCitiesWeather();
+  };
+  
+  const handleRefreshMarket = (params: MarketQueryParams = {}) => {
+    setMarketLoading(true);
+    fetchMarketData(params);
   };
   
   const handleTabChange = (key: string) => {
     setActiveTabKey(key);
   };
 
+  // 获取唯一的产品名称列表
+  const getUniqueProducts = () => {
+    const products = new Set<string>();
+    marketData.forEach(item => {
+      if (item.prodName) {
+        products.add(item.prodName);
+      }
+    });
+    return Array.from(products);
+  };
+
   const renderWeatherContent = () => {
-    if (loading && !refreshing) {
+    if (weatherLoading && !refreshing) {
       return (
         <div style={{ textAlign: 'center', padding: '60px 0' }}>
           <Spin size="large" />
@@ -171,15 +259,15 @@ const Datacenter: React.FC = () => {
       );
     }
     
-    if (error) {
+    if (weatherError) {
       return (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={
-            <span style={{ color: '#ff4d4f' }}>{error}</span>
+            <span style={{ color: '#ff4d4f' }}>{weatherError}</span>
           }
         >
-          <Button type="primary" onClick={handleRefresh} icon={<ReloadOutlined />}>
+          <Button type="primary" onClick={handleRefreshWeather} icon={<ReloadOutlined />}>
             重新加载
           </Button>
         </Empty>
@@ -208,7 +296,7 @@ const Datacenter: React.FC = () => {
             type="primary" 
             icon={<ReloadOutlined />} 
             loading={refreshing}
-            onClick={handleRefresh}
+            onClick={handleRefreshWeather}
             style={{ borderRadius: '4px' }}
           >
             刷新数据
@@ -261,7 +349,7 @@ const Datacenter: React.FC = () => {
                         <Button 
                           size="small" 
                           type="link" 
-                          onClick={handleRefresh}
+                          onClick={handleRefreshWeather}
                           icon={<ReloadOutlined />}
                         >
                           加载数据
@@ -274,6 +362,53 @@ const Datacenter: React.FC = () => {
             </Col>
           ))}
         </Row>
+      </>
+    );
+  };
+
+  const renderMarketContent = () => {
+    if (marketLoading && marketData.length === 0) {
+      return (
+        <div style={{ textAlign: 'center', padding: '60px 0' }}>
+          <Spin size="large" />
+          <div style={{ marginTop: '20px', color: '#999' }}>
+            正在获取水产市场价格数据...
+          </div>
+        </div>
+      );
+    }
+    
+    if (marketError && marketData.length === 0) {
+      return (
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={
+            <span style={{ color: '#ff4d4f' }}>{marketError}</span>
+          }
+        >
+          <Button type="primary" onClick={() => handleRefreshMarket()} icon={<ReloadOutlined />}>
+            重新加载
+          </Button>
+        </Empty>
+      );
+    }
+    
+    return (
+      <>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', alignItems: 'center' }}>
+          <Title level={4} style={{ margin: 0 }}>
+            <ShoppingOutlined style={{ marginRight: '8px' }} />
+            水产市场价格监控
+          </Title>
+        </div>
+        
+        <MarketDataTable 
+          data={marketData} 
+          loading={marketLoading} 
+          onRefresh={handleRefreshMarket}
+        />
+        
+        {/* 移除价格趋势分析区域的所有代码 */}
       </>
     );
   };
@@ -304,21 +439,16 @@ const Datacenter: React.FC = () => {
               {renderWeatherContent()}
             </TabPane>
             
-            {/* 这里可以添加更多的数据类型标签页 */}
-            <TabPane tab="水质数据" key="water">
-              {/* 水质数据内容 */}
-              <div style={{ padding: '20px', textAlign: 'center' }}>
-                <h3>水质数据展示区域</h3>
-                <p>此区域可集成水质监测数据</p>
-              </div>
-            </TabPane>
-            
-            <TabPane tab="生态数据" key="ecology">
-              {/* 生态数据内容 */}
-              <div style={{ padding: '20px', textAlign: 'center' }}>
-                <h3>生态数据展示区域</h3>
-                <p>此区域可集成生态监测数据</p>
-              </div>
+            <TabPane 
+              tab={
+                <span>
+                  <ShoppingOutlined />
+                  市场数据
+                </span>
+              } 
+              key="market"
+            >
+              {renderMarketContent()}
             </TabPane>
           </Tabs>
         </Card>
@@ -327,4 +457,4 @@ const Datacenter: React.FC = () => {
   );
 };
 
-export default Datacenter; 
+export default Datacenter;
