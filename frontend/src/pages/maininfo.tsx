@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Box, Card, CardMedia, TextField, Button } from '@mui/material';
 import { getVideosByDate } from '../services/DataGet';
+import WaterQuality from './WaterQuality'; // 导入 WaterQuality 组件
 
 const MainInfo: React.FC = () => {
   const [date, setDate] = useState('');
@@ -73,7 +74,17 @@ const MainInfo: React.FC = () => {
           </Typography>
         )}
       </Box>
+
+         {/* 在 MainInfo 中嵌入 WaterQuality 组件 */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h5" component="h2" gutterBottom>
+          水质数据
+        </Typography>
+        <WaterQuality />
+      </Box>
     </Box>
+
+
   );
 };
 

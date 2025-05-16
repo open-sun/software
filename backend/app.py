@@ -36,8 +36,8 @@ with app.app_context():
 @app.route('/data/<path:filename>')
 def serve_data(filename):
     return send_from_directory('data', filename)
-# 假设你的数据文件目录是 backend/data/水质数据/
-DATA_DIR = os.path.join(os.path.dirname(__file__), 'data', '水质数据')
+# 假设你的数据文件目录是 backend/data/WaterQualitybyDate/
+DATA_DIR = os.path.join(os.path.dirname(__file__), 'data', 'WaterQualitybyDate')
 
 @app.route('/api/TimeWaterData', methods=['GET'])
 def get_time_water_data():
@@ -66,7 +66,7 @@ def get_time_water_data():
         return jsonify({"error": str(e)}), 500
 
 # CSV 文件目录
-BASE_DIR = os.path.join(os.path.dirname(__file__), 'data', '水质数据', 'water_quality_by_name')
+BASE_DIR = os.path.join(os.path.dirname(__file__), 'data', 'WaterQualitybyDate', 'water_quality_by_name')
 
 @app.route('/api/waterdata_by_name', methods=['GET'])
 def get_water_data_by_name():
@@ -257,6 +257,90 @@ def update_user_role(user_id):
             "success": False,
             "error": str(e)
         }), 500
+
+
+# # 获取日期排布水质数据
+# @app.route('/api/waterquality', methods=['GET'])
+# def get_water_quality():
+#     """
+#     根据月份和指标获取数据
+#     - month: 2020-05
+#     - indicator: 水温, pH, 溶解氧, 电导率, 浊度等
+#     """
+#     month = request.args.get('month')
+#     indicator = request.args.get('indicator')
+
+#     if not month or not indicator:
+#         return jsonify({"error": "Missing 'month' or 'indicator' parameter"}), 400
+
+#     # 数据路径：/data/水质数据/2020-05/
+#     folder_path = os.path.join(DATA_DIR, month)
+
+#     if not os.path.exists(folder_path):
+#         return jsonify({"error": f"Data folder for {month} not found"}), 404
+
+#     # 初始化返回数据
+#     xAxisData = []
+#     seriesData = []
+
+#     # 遍历该月份下的所有 JSON 文件
+#     for day in range(1, 32):
+#         day_str = f"{day:02d}"
+#         filename = f"{month}-{day_str}.json"
+#         file_path = os.path.join(folder_path, filename)
+
+#         if not os.path.exists(file_path):
+#             # 文件不存在则跳过
+#             xAxisData.append(day_str)
+#             seriesData.append(None)
+#             continue
+
+#         try:
+#             with open(file_path, 'r', encoding='utf-8') as file:
+#                 data = json.load(file)
+#                 if "thead" not in data or "tbody" not in data:
+#                     continue
+
+#                 # 找到指标列索引
+#                 try:
+#                     indicator_index = data["thead"].index(indicator)
+#                 except ValueError:
+#                     indicator_index = -1
+
+#                 if indicator_index == -1:
+#                     xAxisData.append(day_str)
+#                     seriesData.append(None)
+#                     continue
+
+#                 # 遍历 tbody 获取当天数据
+#                 daily_values = []
+#                 for row in data["tbody"]:
+#                     value = row[indicator_index]
+#                     value = float(value) if value not in ["--", "*", None] else None
+#                     daily_values.append(value)
+
+#                 # 取当天平均值作为展示数据
+#                 valid_values = [v for v in daily_values if v is not None]
+#                 avg_value = sum(valid_values) / len(valid_values) if valid_values else None
+
+#                 xAxisData.append(day_str)
+#                 seriesData.append(avg_value)
+
+#         except Exception as e:
+#             print(f"Error reading {filename}: {e}")
+#             xAxisData.append(day_str)
+#             seriesData.append(None)
+
+#     # 构建响应
+#     response_data = {
+#         "xAxisData": xAxisData,
+#         "seriesData": seriesData
+#     }
+#     return jsonify(response_data), 200
+
+
+
+
 
 @app.route('/api/fishdata', methods=['GET'])
 def get_fish_data():

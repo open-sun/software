@@ -10,6 +10,8 @@ import WaterDataViewer from './pages/WaterDataViewer';
 import MapTest from './pages/MapTest';
 import UnderwaterSystem from './pages/UnderwaterSystem';
 
+import WaterQuality from './pages/WaterQuality';
+import LineArea from './pages/LineArea';
 
 const App: React.FC = () => {
   return (
@@ -24,6 +26,8 @@ const App: React.FC = () => {
         <Route path="/WaterDataViewer" element={<WaterDataViewer />} />
         <Route path="/MapTest" element={<MapTest />} />
         <Route path="/underwater" element={<UnderwaterSystem />} />
+        <Route path="/WaterQuality" element={<WaterQuality />} />
+        <Route path="/LineArea" element={<LineArea />} />
       </Routes>
     </Router>
   );

@@ -42,7 +42,7 @@ export const getVideosByDate = async (date: string) => {
 };
 
 
-export const getMapData = async (mapName: string) => {
+export const getJsonData = async (mapName: string) => {
   try {
     const response = await axiosInstance.get(`/data/${mapName}.json`);
     return response.data;

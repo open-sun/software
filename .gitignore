@@ -3,9 +3,9 @@
 # 后端
 /backend/__pycache__
 /backend/.venv
-/backend/data/水质数据/
+/backend/data/WaterQualitybyDate/*
 
-
+/backend/data/水质数据/*
 # 前端
 
 # dependencies
