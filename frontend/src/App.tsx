@@ -9,6 +9,7 @@ import Management from './pages/management';
 import WaterDataViewer from './pages/WaterDataViewer';
 import MapTest from './pages/MapTest';
 import UnderwaterSystem from './pages/UnderwaterSystem';
+import Datacenter from './pages/datacenter';
 
 import WaterQuality from './pages/WaterQuality';
 import LineArea from './pages/LineArea';
@@ -28,6 +29,7 @@ const App: React.FC = () => {
         <Route path="/underwater" element={<UnderwaterSystem />} />
         <Route path="/WaterQuality" element={<WaterQuality />} />
         <Route path="/LineArea" element={<LineArea />} />
+        <Route path="/datacenter" element={<Datacenter />} />
       </Routes>
     </Router>
   );
