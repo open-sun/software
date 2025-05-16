@@ -8,20 +8,23 @@ import MainInfo from './pages/maininfo'
 import Management from './pages/management';
 import WaterDataViewer from './pages/WaterDataViewer';
 import MapTest from './pages/MapTest';
+import UnderwaterSystem from './pages/UnderwaterSystem';
+
 
 const App: React.FC = () => {
   return (
     <Router>
-        <Header />
-        <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/maininfo" element={<MainInfo />} />
-            <Route path="/management" element={<Management />} />
-            <Route path="/WaterDataViewer" element={<WaterDataViewer />} />
-            <Route path="/MapTest" element={<MapTest />} />
-        </Routes>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/maininfo" element={<MainInfo />} />
+        <Route path="/management" element={<Management />} />
+        <Route path="/WaterDataViewer" element={<WaterDataViewer />} />
+        <Route path="/MapTest" element={<MapTest />} />
+        <Route path="/underwater" element={<UnderwaterSystem />} />
+      </Routes>
     </Router>
   );
 };

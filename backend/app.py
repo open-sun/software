@@ -10,6 +10,8 @@ from flask_cors import CORS
 import os
 import json
 import csv
+import socket
+import random
 
 app = Flask(__name__)
 CORS(app)
@@ -19,7 +21,7 @@ HOSTNAME = "127.0.0.1"
 PORT = "3306"
 DATABASE = "flask"
 USERNAME = "root"
-PASSWORD = "123456"# 注意更改
+PASSWORD = "989739"# 注意更改
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}:{PORT}/{DATABASE}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -256,6 +258,27 @@ def update_user_role(user_id):
             "error": str(e)
         }), 500
 
+@app.route('/api/fishdata', methods=['GET'])
+def get_fish_data():
+    fish_file_path = os.path.join(os.path.dirname(__file__), 'data', 'Fish.csv')
 
+    if not os.path.exists(fish_file_path):
+        return jsonify({"error": "Fish.csv 文件不存在"}), 404
+
+    try:
+        with open(fish_file_path, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            rows = list(reader)
+
+        return jsonify({
+            "result": 1,
+            "total": len(rows),
+            "thead": reader.fieldnames,
+            "tbody": rows
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+        
 if __name__ == '__main__':
     app.run()
