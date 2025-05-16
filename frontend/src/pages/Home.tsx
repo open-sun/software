@@ -1,4 +1,5 @@
 import React from 'react';
+import AnimatedTextChart from '../components/AnimatedTextChart';
 import { 
   Container, 
   Typography, 
@@ -16,6 +17,13 @@ const Home: React.FC = () => {
     <Container maxWidth="lg" sx={{ py: 6 }}>
       {/* 系统介绍 */}
       <Box sx={{ mb: 6 }}>
+        <AnimatedTextChart
+        text="智 慧 海 洋 牧 场"
+        fontSize={160}
+        color="#007acc"
+        stroke="#007acc"
+        lineWidth={2}
+      />
         <Typography variant="h4" gutterBottom>
           智慧海洋牧场可视化系统
         </Typography>
