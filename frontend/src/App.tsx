@@ -14,6 +14,7 @@ import UnderwaterSystem from './pages/UnderwaterSystem';
 import Datacenter from './pages/datacenter';
 import WaterQuality from './pages/WaterQuality';
 import LineArea from './pages/LineArea';
+import Smartcenter from './pages/Smartcenter';
 
 const App: React.FC = () => {
   const dispatch = useDispatch();
@@ -49,6 +50,7 @@ const App: React.FC = () => {
         <Route path="/WaterQuality" element={<WaterQuality />} />
         <Route path="/LineArea" element={<LineArea />} />
         <Route path="/datacenter" element={<Datacenter />} />
+        <Route path="/smartcenter" element={<Smartcenter />} />
       </Routes>
     </Router>
   );
