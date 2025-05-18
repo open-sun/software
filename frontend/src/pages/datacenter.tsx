@@ -196,7 +196,7 @@ const Datacenter: React.FC = () => {
       
       if (result && result.list) {
         if (result.list.length === 0) {
-          setMarketError('没有获取到市场数据，请稍后再试');
+          setMarketError('今日市场未开市，没有获取到市场数据，请稍后再试');
         } else {
           setMarketData(result.list);
           console.log(`成功获取到${result.list.length}条市场数据`);
