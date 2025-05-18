@@ -32,6 +32,7 @@ interface User {
         state.isAuthenticated = false;
         state.user = null;
         localStorage.removeItem("token"); // 清除本地存储的 token
+        localStorage.removeItem("user");  // 清除本地存储的 user
       },
     },
   });
