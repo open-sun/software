@@ -360,7 +360,7 @@ setLoading(false);
         <Button variant="contained" onClick={handleLoadData}>加载数据</Button>
       </Box>
 
-      <div ref={chartRef} style={{ width: '100%', height: '400px', backgroundColor: '#f5f5f5' }} />
+      <div ref={chartRef} style={{ width: '100%', height: '450px', backgroundColor: '#f5f5f5' }} />
     </Box>
   );
 };
