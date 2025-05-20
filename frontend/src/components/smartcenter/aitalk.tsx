@@ -8,7 +8,7 @@ import {
   Paper,
 } from "@mui/material";
 import ReactMarkdown from "react-markdown"; // ✅ 引入 react-markdown
-import { sendInputmessage } from "../../services/aitalk";
+import { sendInputmessage } from "../../services/smartcenter";
 
 interface Message {
   sender: "user" | "ai";

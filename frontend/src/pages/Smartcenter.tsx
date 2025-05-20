@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, List, ListItemButton, ListItemText, Divider } from '@mui/material';
 import  AiTalk from '../components/smartcenter/aitalk'
-
+import ImageRecognizer from '../components/smartcenter/ImageRecognizer'
 const Smartcenter: React.FC = () => {
   const [selectedFeature, setSelectedFeature] = useState('智能问答');
 
@@ -46,7 +46,7 @@ const Smartcenter: React.FC = () => {
             <Typography variant="body1">此处为鱼类体长预测功能的内容展示区域。</Typography>
           )}
           {selectedFeature === '图片识别' && (
-            <Typography variant="body1">此处为图片识别功能的内容展示区域。</Typography>
+            <ImageRecognizer/>
           )}
           {selectedFeature === '运动轨迹追踪' && (
             <Typography variant="body1">此处为运动轨迹追踪功能的内容展示区域。</Typography>

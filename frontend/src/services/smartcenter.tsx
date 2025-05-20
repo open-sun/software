@@ -12,3 +12,19 @@ export const sendInputmessage = async (userInput: string) => {
   }
 };
 
+export const sendImageForRecognition = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axiosInstance.post("/recognize", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data; // { result: string }
+  } catch (error) {
+    throw error;
+  }
+};

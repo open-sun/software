@@ -14,9 +14,12 @@ import socket
 import random
 import requests
 
-from AITalk import chat
+from SmartAI import chat,recognize_image_with_zhipu
 from dotenv import load_dotenv
 import os
+
+
+
 
 
 load_dotenv()
@@ -695,7 +698,31 @@ def chat_route():
         import traceback
         traceback.print_exc()  # 打印完整的错误栈
         return jsonify({"error": str(e)}), 500
+    
 
+
+    
+@app.route("/recognize", methods=["POST"])
+def recognize_image():
+    if "file" not in request.files:
+        return jsonify({"error": "Missing file field"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    try:
+        image_bytes = file.read()
+
+        # ✅ 调用封装的函数
+        result_text = recognize_image_with_zhipu(image_bytes)
+
+        return jsonify({"result": result_text})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
