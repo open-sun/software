@@ -38,7 +38,7 @@ def chat(user_input: str) -> str:
 
 
 
-API_KEY = "2fb8ce7647eb491db91be7d8b6650be6.vJ2aSN6frXXn4qlY"
+API_KEY = os.getenv("ZHIPU_API_KEY")
 
 def recognize_image_with_zhipu(image_bytes: bytes, model: str = "glm-4v-flash", prompt: str = "请描述这个图片中鱼的种类大约长度和重量") -> str:
     """
