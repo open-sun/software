@@ -240,9 +240,10 @@ def login():
 
 @app.route("/api/getusers", methods=["GET"])
 def getusers():
-    users = User.query.all()
+    users = User.query.filter_by(role="user").all()  # Filter users by role 'user'
     user_list = [{"id": user.id, "username": user.username, "role": user.role} for user in users]
     return jsonify(user_list), 200
+
 
 
 @app.route("/api/updateuserrole/<int:user_id>", methods=["PUT"])
@@ -268,6 +269,29 @@ def update_user_role(user_id):
             "success": False,
             "error": str(e)
         }), 500
+    
+@app.route("/api/deleteuser/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id):
+    try:
+        user = User.query.get(user_id)
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return jsonify({
+                "success": True,
+                "message": f"用户 {user_id} 已删除"
+            }), 200
+        else:
+            return jsonify({
+                "success": False,
+                "message": f"用户 {user_id} 不存在"
+            }), 404
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
 
 
 # # 获取日期排布水质数据

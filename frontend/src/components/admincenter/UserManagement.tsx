@@ -1,11 +1,11 @@
-// src/components/admincenter/UserManagement.tsx
 import React, { useEffect, useState } from "react";
 import {
   Typography, Box, Paper, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, FormControl,
-  InputLabel, Select, MenuItem
+  InputLabel, Select, MenuItem, IconButton
 } from "@mui/material";
-import { getusers, updateuserrole } from "../../services/usermanagement";
+import { getusers, updateuserrole, deleteuser } from "../../services/usermanagement";
+import DeleteIcon from '@mui/icons-material/Delete'; // Import the delete icon
 
 interface User {
   id: number;
@@ -39,6 +39,15 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  const handleDeleteUser = async (userid: number) => {
+    try {
+      await deleteuser(userid);
+      setUsers(users.filter(user => user.id !== userid)); // Remove the user from the state
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+    }
+  };
+
   return (
     <Box>
       <TableContainer component={Paper}>
@@ -69,6 +78,13 @@ const UserManagement: React.FC = () => {
                       <MenuItem value="admin">管理员</MenuItem>
                     </Select>
                   </FormControl>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDeleteUser(user.id)}
+                    aria-label="delete"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
