@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import  { useEffect } from "react";
 import {
   TextField,
   Button,
@@ -23,16 +24,28 @@ const LoginPage: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate(); // 用于页面跳转
 
+  // 检查本地存储，实现持久化登录
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const { username, role } = JSON.parse(userData);
+      dispatch(loginSuccess({ username, role }));
+      navigate("/maininfo");
+    }
+  }, [dispatch, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       const response = await login(username, password);
       if (!response.ok) {
-        setError(response.message);
+        setError(response.message );
         throw new Error(response.message);
       }
       const role = response.role;
+      // 存储到 localStorage
+      localStorage.setItem('user', JSON.stringify({ username, role }));
       dispatch(loginSuccess({ username, role })); // 调用登录成功的 action
       navigate("/maininfo");
     } catch (error) {

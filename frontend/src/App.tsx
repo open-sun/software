@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from './components/AuthContext'; // 导入 loginSuccess
 import Home from './pages/Home'
 import Header from './components/Layouts/Header'
 import Login from './pages/login'
@@ -25,6 +27,24 @@ const AuthLayout = ({ children }: { children: React.ReactNode }) => (
 );
 
 const App: React.FC = () => {
+  const dispatch = useDispatch();
+
+  // 应用初始化时检测 localStorage，实现持久化登录
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user && user.username && user.role) {
+          dispatch(loginSuccess(user));
+        }
+      } catch (e) {
+        // 解析失败则清除
+        localStorage.removeItem('user');
+      }
+    }
+  }, [dispatch]);
+
   return (
     <Router>
       <Routes>
@@ -42,6 +62,8 @@ const App: React.FC = () => {
         <Route path="/management" element={<Layout><Management /></Layout>} />
         <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
         <Route path="/smartcenter" element={<Layout><SmartCenter /></Layout>} />
+        <Route path="/waterquality" element={<Layout><WaterQuality /></Layout>} />
+        <Route path="/linearea" element={<Layout><LineArea /></Layout>} />
       </Routes>
     </Router>
   );
