@@ -7,7 +7,7 @@ import Header from './components/Layouts/Header'
 import Login from './pages/login'
 import Register from './pages/register'
 import MainInfo from './pages/maininfo'
-import Management from './pages/management';
+import AdminCenter from './pages/AdminCenter';
 import WaterDataViewer from './pages/WaterDataViewer';
 import MapTest from './pages/MapTest';
 import UnderwaterSystem from './pages/UnderwaterSystem';
@@ -59,7 +59,7 @@ const App: React.FC = () => {
         <Route path="/datacenter" element={<Layout><Datacenter /></Layout>} />
         <Route path="/WaterDataViewer" element={<Layout><WaterDataViewer /></Layout>} />
         <Route path="/MapTest" element={<Layout><MapTest /></Layout>} />
-        <Route path="/management" element={<Layout><Management /></Layout>} />
+        <Route path="/management" element={<Layout><AdminCenter /></Layout>} />
         <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
         <Route path="/smartcenter" element={<Layout><SmartCenter /></Layout>} />
         <Route path="/waterquality" element={<Layout><WaterQuality /></Layout>} />

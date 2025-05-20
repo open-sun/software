@@ -7,6 +7,7 @@ import {
   CircularProgress,
   Paper,
 } from "@mui/material";
+import ReactMarkdown from "react-markdown"; // ✅ 引入 react-markdown
 import { sendInputmessage } from "../../services/aitalk";
 
 interface Message {
@@ -45,42 +46,67 @@ const AiTalk: React.FC = () => {
   };
 
   return (
-    <Box sx={{ padding: 2, maxWidth: 600, margin: "0 auto" }}>
+<Box sx={{ padding: 2, maxWidth: 700, margin: "0 auto" }}>
+  <Box
+    sx={{
+      mb: 2,
+      p: 2,
+      border: "1px solid #ccc",
+      borderRadius: 2,
+      height: "550px", // ⬅️ 放大高度
+      overflowY: "auto",
+      backgroundColor: "#f9f9f9",
+    }}
+  >
+    {messages.map((msg, index) => (
       <Box
+        key={index}
         sx={{
-          mb: 2,
-          p: 2,
-          border: "1px solid #ccc",
-          borderRadius: 2,
-          height: "400px",
-          overflowY: "auto",
-          backgroundColor: "#f9f9f9",
+          display: "flex",
+          justifyContent:
+            msg.sender === "user" ? "flex-end" : "flex-start",
+          mb: 1,
         }}
       >
-        {messages.map((msg, index) => (
-          <Box
-            key={index}
-            sx={{
-              display: "flex",
-              justifyContent: msg.sender === "user" ? "flex-end" : "flex-start",
-              mb: 1,
-            }}
-          >
-            <Paper
-              elevation={1}
-              sx={{
-                p: 1.5,
-                backgroundColor:
-                  msg.sender === "user" ? "#1976d2" : "#e0e0e0",
-                color: msg.sender === "user" ? "#fff" : "#000",
-                maxWidth: "70%",
-              }}
-            >
-              {msg.text}
-            </Paper>
-          </Box>
-        ))}
+        <Paper
+          elevation={1}
+          sx={{
+            p: 1.5,
+            backgroundColor: msg.sender === "user" ? "#1976d2" : "#e0e0e0",
+            color: msg.sender === "user" ? "#fff" : "#000",
+            maxWidth: "90%",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            fontSize: "0.85rem", // ⬅️ 字体变小
+            lineHeight: 1.4,               // ✅ 行高变小
+            "& p": { 
+              margin: 0,
+              lineHeight: 1.1,
+
+             },
+            "& ul, & ol": {
+              paddingLeft: "1.2em",     // 控制缩进
+              margin: 0,
+              lineHeight: 0.9,
+            },
+            "& li": {
+              margin: 0,                // 去除默认 margin
+              padding: 0,               // 去除 padding
+              lineHeight: 1,          // 控制每一项的行高
+            },
+            "& h1, & h2, & h3": { margin: "4px 0" },
+          }}
+        >
+          {msg.sender === "ai" ? (
+            <ReactMarkdown>{msg.text}</ReactMarkdown>
+          ) : (
+            msg.text
+          )}
+        </Paper>
       </Box>
+    ))}
+  </Box>
+
 
       <TextField
         label="Type your message"
