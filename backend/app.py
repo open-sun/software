@@ -14,6 +14,16 @@ import socket
 import random
 import requests
 
+from AITalk import chat
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
+
+
+
 app = Flask(__name__)
 CORS(app)
 
@@ -22,7 +32,7 @@ HOSTNAME = "127.0.0.1"
 PORT = "3306"
 DATABASE = "flask"
 USERNAME = "root"
-PASSWORD = "123456"# 注意更改
+PASSWORD = os.getenv("DB_PASSWORD")
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USERNAME}:{PASSWORD}@{HOSTNAME}:{PORT}/{DATABASE}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -642,6 +652,26 @@ def get_market_trends():
         error_msg = f"获取价格趋势失败: {str(e)}"
         print(error_msg)
         return jsonify({'error': error_msg}), 500
+    
+
+
+
+@app.route("/chat", methods=["POST"])
+def chat_route():
+    data = request.get_json()
+    user_input = data.get("input")
+
+    if not user_input:
+        return jsonify({"error": "Missing input field"}), 400
+
+    try:
+        response = chat(user_input)
+        return jsonify({"response": response})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()  # 打印完整的错误栈
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

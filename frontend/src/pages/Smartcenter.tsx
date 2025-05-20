@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, List, ListItemButton, ListItemText, Divider } from '@mui/material';
+import  AiTalk from '../components/smartcenter/aitalk'
 
 const Smartcenter: React.FC = () => {
   const [selectedFeature, setSelectedFeature] = useState('智能问答');
@@ -39,7 +40,7 @@ const Smartcenter: React.FC = () => {
         <Divider sx={{ mb: 2 }} />
         <Box>
           {selectedFeature === '智能问答' && (
-            <Typography variant="body1">此处为智能问答功能的内容展示区域。</Typography>
+            <AiTalk/>
           )}
           {selectedFeature === '鱼类体长预测' && (
             <Typography variant="body1">此处为鱼类体长预测功能的内容展示区域。</Typography>
