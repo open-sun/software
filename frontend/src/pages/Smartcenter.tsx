@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Box, Typography, List, ListItemButton, ListItemText, Divider } from '@mui/material';
-import  AiTalk from '../components/smartcenter/aitalk'
-import ImageRecognizer from '../components/smartcenter/ImageRecognizer'
+import { Box, Typography, ListItemButton, ListItemText, Divider } from '@mui/material';
+import AiTalk from '../components/smartcenter/AiTalk';
+import ImageRecognizer from '../components/smartcenter/ImageRecognizer';
+import FarmingAdvice from '../components/smartcenter/FileRecognizer';
+
 const Smartcenter: React.FC = () => {
   const [selectedFeature, setSelectedFeature] = useState('智能问答');
 
-  const features = ['智能问答', '鱼类体长预测', '图片识别', '运动轨迹追踪'];
+  const features = ['智能问答', '鱼类体长预测', '图片识别', '运动轨迹追踪', '养殖建议'];
 
   const handleSelectFeature = (feature: string) => {
     setSelectedFeature(feature);
@@ -39,18 +41,15 @@ const Smartcenter: React.FC = () => {
         <Typography variant="h5" sx={{ mb: 2, color: '#1976d2' }}>{selectedFeature}</Typography>
         <Divider sx={{ mb: 2 }} />
         <Box>
-          {selectedFeature === '智能问答' && (
-            <AiTalk/>
-          )}
+          {selectedFeature === '智能问答' && <AiTalk />}
           {selectedFeature === '鱼类体长预测' && (
             <Typography variant="body1">此处为鱼类体长预测功能的内容展示区域。</Typography>
           )}
-          {selectedFeature === '图片识别' && (
-            <ImageRecognizer/>
-          )}
+          {selectedFeature === '图片识别' && <ImageRecognizer />}
           {selectedFeature === '运动轨迹追踪' && (
             <Typography variant="body1">此处为运动轨迹追踪功能的内容展示区域。</Typography>
           )}
+          {selectedFeature === '养殖建议' && <FarmingAdvice />}
         </Box>
       </Box>
     </Box>

@@ -14,10 +14,10 @@ import socket
 import random
 import requests
 
-from SmartAI import chat,recognize_image_with_zhipu
+from SmartAI import chat,recognize_image_with_zhipu,process_uploaded_file
 from dotenv import load_dotenv
 import os
-
+from werkzeug.utils import secure_filename
 
 
 
@@ -701,8 +701,8 @@ def chat_route():
     
 
 
-    
-@app.route("/recognize", methods=["POST"])
+
+@app.route("/recognizeIMG", methods=["POST"])
 def recognize_image():
     if "file" not in request.files:
         return jsonify({"error": "Missing file field"}), 400
@@ -723,6 +723,27 @@ def recognize_image():
         import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+
+
+
+@app.route("/recognizeFile", methods=["POST"])
+def recognize_file():
+    if "file" not in request.files:
+        return jsonify({"error": "Missing file field"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    try:
+        result_text = process_uploaded_file(file)
+        return jsonify({"result": result_text})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

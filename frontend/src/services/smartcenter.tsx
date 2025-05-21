@@ -17,13 +17,32 @@ export const sendImageForRecognition = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await axiosInstance.post("/recognize", formData, {
+    const response = await axiosInstance.post("/recognizeIMG", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
 
     return response.data; // { result: string }
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+export const sendFileForRecognition = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axiosInstance.post("/recognizeFile", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data; // 期望返回结构：{ result: string }
   } catch (error) {
     throw error;
   }
