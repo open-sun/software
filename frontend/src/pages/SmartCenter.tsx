@@ -1,157 +1,59 @@
-
-import Grid from '@mui/material/Grid';
-import Typography from '@mui/material/Typography';
-import {AnalyticsCurrentVisits} from '../components/example/example1'
-import {AnalyticsWidgetSummary} from '../components/example/example2'
-import {AnalyticsWebsiteVisits} from '../components/example/example3'
-import {Box} from '@mui/material';
-import '../index.css'
-
-// ----------------------------------------------------------------------
+import React, { useState } from 'react';
+import { Box, Typography, ListItemButton, ListItemText, Divider } from '@mui/material';
+import AiTalk from '../components/smartcenter/aitalk';
+import ImageRecognizer from '../components/smartcenter/ImageRecognizer';
+import FarmingAdvice from '../components/smartcenter/FileRecognizer';
 
 const SmartCenter: React.FC = () => {
+  const [selectedFeature, setSelectedFeature] = useState('智能问答');
+
+  const features = ['智能问答', '鱼类体长预测', '图片识别', '运动轨迹追踪', '养殖建议'];
+
+  const handleSelectFeature = (feature: string) => {
+    setSelectedFeature(feature);
+  };
+
   return (
-    <Box
-      sx={{
-        backgroundColor: '#e3f2fd', // 背景颜色
-        minHeight: '100vh', // 保证背景覆盖整个页面
-        padding: 3, // 外边距
-        backgroundSize: 'cover', // 背景图覆盖整个容器
-      }}
-    >
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        Hi, Welcome back 👋
-      </Typography>
-
-      <Grid container spacing={3}>
-
-
-        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-                    <AnalyticsWidgetSummary
-            title="Active Users"
-            total={128456}
-            percent={0.12}
-            color="info"
-            icon="tabler:user"
-            chart={{
-                series: [100, 120, 150, 170, 180, 190, 220],
-                categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f0f4f8', p: 4 }}>
+      {/* 左侧菜单栏 */}
+      <Box sx={{ width: '20%', backgroundColor: '#ffffff', p: 2, borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
+        <Typography variant="h5" sx={{ mb: 2, color: '#1976d2', fontWeight: 'bold' }}>智能中心</Typography>
+        {features.map((feature) => (
+          <ListItemButton 
+            key={feature} 
+            onClick={() => handleSelectFeature(feature)}
+            sx={{
+              backgroundColor: selectedFeature === feature ? '#e3f2fd' : 'transparent',
+              borderRadius: '8px',
+              mb: 1,
+              '&:hover': {
+                backgroundColor: '#e3f2fd',
+              },
             }}
-            />
-        </Grid>
+          >
+            <ListItemText primary={feature} sx={{ color: '#1976d2', fontWeight: selectedFeature === feature ? 'bold' : 'normal' }} />
+          </ListItemButton>
+        ))}
+      </Box>
 
-        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-                    <AnalyticsWidgetSummary
-            title="Active Users"
-            total={128456}
-            percent={0.12}
-            color="info"
-            icon="tabler:user"
-            chart={{
-                series: [100, 120, 150, 170, 180, 190, 220],
-                categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            }}
-            />
-        </Grid>
-
-
-        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-                    <AnalyticsWidgetSummary
-            title="Active Users"
-            total={128456}
-            percent={0.12}
-            color="info"
-            icon="tabler:user"
-            chart={{
-                series: [100, 120, 150, 170, 180, 190, 220],
-                categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            }}
-            />
-        </Grid>
-
-         <Grid size={{ xs: 12, md: 6, lg: 3 }}>
-                    <AnalyticsWidgetSummary
-            title="Active Users"
-            total={128456}
-            percent={0.12}
-            color="info"
-            icon="tabler:user"
-            chart={{
-                series: [100, 120, 150, 170, 180, 190, 220],
-                categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            }}
-            />
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <AnalyticsCurrentVisits
-            title="Current visits"
-            chart={{
-              series: [
-                { label: 'America', value: 3500 },
-                { label: 'Asia', value: 2500 },
-                { label: 'Europe', value: 1500 },
-                { label: 'Africa', value: 500 },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 6, lg: 8 }}>
-         <AnalyticsWebsiteVisits
-            title="Website Visits"
-            subheader="(+43%) than last year"
-            chart={{
-                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                series: [
-                {
-                    name: 'Visits',
-                    data: [4400, 5400, 6500, 7000, 8200, 9100],
-                },
-                {
-                    name: 'Returning',
-                    data: [2200, 2800, 3000, 3900, 4300, 5200],
-                },
-                ],
-            }}
-            />
-
-        </Grid>
-        <Grid size={{ xs: 12, md: 6, lg: 8 }}>
-         <AnalyticsWebsiteVisits
-            title="Website Visits"
-            subheader="(+43%) than last year"
-            chart={{
-                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                series: [
-                {
-                    name: 'Visits',
-                    data: [4400, 5400, 6500, 7000, 8200, 9100],
-                },
-                {
-                    name: 'Returning',
-                    data: [2200, 2800, 3000, 3900, 4300, 5200],
-                },
-                ],
-            }}
-            />
-        </Grid>
-         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-         <AnalyticsCurrentVisits
-            title="Current visits"
-            chart={{
-              series: [
-                { label: 'America', value: 3500 },
-                { label: 'Asia', value: 2500 },
-                { label: 'Europe', value: 1500 },
-                { label: 'Africa', value: 500 },
-              ],
-            }}
-          />
-        </Grid>
-      </Grid>
+      {/* 右侧功能展示区 */}
+      <Box sx={{ flex: 1, ml: 4, backgroundColor: '#ffffff', p: 3, borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
+        <Typography variant="h5" sx={{ mb: 2, color: '#1976d2' }}>{selectedFeature}</Typography>
+        <Divider sx={{ mb: 2 }} />
+        <Box>
+          {selectedFeature === '智能问答' && <AiTalk />}
+          {selectedFeature === '鱼类体长预测' && (
+            <Typography variant="body1">此处为鱼类体长预测功能的内容展示区域。</Typography>
+          )}
+          {selectedFeature === '图片识别' && <ImageRecognizer />}
+          {selectedFeature === '运动轨迹追踪' && (
+            <Typography variant="body1">此处为运动轨迹追踪功能的内容展示区域。</Typography>
+          )}
+          {selectedFeature === '养殖建议' && <FarmingAdvice />}
+        </Box>
+      </Box>
     </Box>
   );
-}
+};
 
 export default SmartCenter;

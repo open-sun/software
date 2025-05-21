@@ -10,6 +10,18 @@ TARGET_NPM_VERSION="10.9.0"
 BACKEND_DIR="backend"
 VENV_DIR="${BACKEND_DIR}/.venv"
 
+
+#!/bin/bash
+
+cat > backend/.env <<EOF
+# 智谱AI的API密钥
+ZHIPUAI_API_KEY=2fb8ce7647eb491db91be7d8b6650be6.vJ2aSN6frXXn4qlY
+
+# 数据库密码
+DB_PASSWORD=123456
+EOF
+
+echo "backend/.env 文件已生成。"
 echo "Node.js v22.12.0 和 npm v10.9.0 安装脚本"
 echo "=============================="
 
