@@ -108,12 +108,14 @@ const MapTest: React.FC = () => {
   }, [columnOptions]);
 
   // 获取所有流域
-  const basins = React.useMemo(() => {
-    if (!modalData || !modalData.files) return [];
-    return Array.from(new Set(modalData.files.flatMap((f: any) =>
-      f.tbody.map((row: any) => row['流域'])
-    )));
-  }, [modalData]);
+const basins = React.useMemo(() => {
+  if (!modalData || !Array.isArray(modalData.files)) return [];
+  return Array.from(new Set(
+    modalData.files.flatMap((f: any) =>
+      Array.isArray(f.tbody) ? f.tbody.map((row: any) => row['流域']) : []
+    )
+  ));
+}, [modalData]);
 
   // 获取当前流域下的断面名称
   const sites = React.useMemo(() => {
