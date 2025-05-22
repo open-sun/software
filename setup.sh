@@ -18,7 +18,7 @@ cat > backend/.env <<EOF
 ZHIPUAI_API_KEY=2fb8ce7647eb491db91be7d8b6650be6.vJ2aSN6frXXn4qlY
 
 # 数据库密码
-DB_PASSWORD=123456
+DB_PASSWORD=989739
 EOF
 
 echo "backend/.env 文件已生成。"
@@ -130,7 +130,7 @@ else
   # 检查 requirements.txt 是否存在
   if [ -f "requirements.txt" ]; then
     echo "安装 requirements.txt 中的依赖..."
-    pip install -r requirements.txt
+    pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
   else
     echo "未找到 requirements.txt，跳过依赖安装。"
   fi
