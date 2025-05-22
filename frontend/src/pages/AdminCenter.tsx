@@ -1,9 +1,9 @@
 // src/pages/AdminCenter.tsx
 import React, { useState } from 'react';
 import { Box, Typography, ListItemButton, ListItemText, Divider } from '@mui/material';
-import UserManagement from '../components/admincenter/UserManagement';
-import HydrologyManagement from '../components/admincenter/HydrologyManagement';
-import FishManagement from '../components/admincenter/FishManagement';
+import UserManagement from '../components/AdminCenter/UserManagement';
+import HydrologyManagement from '../components/AdminCenter/HydrologyManagement';
+import FishManagement from '../components/AdminCenter/FishManagement';
 
 const AdminCenter: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState('用户管理');

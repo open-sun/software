@@ -71,7 +71,7 @@ const Home: React.FC = () => {
         <Button 
           component={Link}
           color="primary" 
-          to="/register"
+          to="/Register"
           sx={{ marginRight: 2 }}
         >
           注册
@@ -79,7 +79,7 @@ const Home: React.FC = () => {
         <Button 
            component={Link}
            color="primary" 
-           to="/login"
+           to="/Login"
         >
           登录
         </Button>

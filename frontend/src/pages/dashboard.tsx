@@ -1,9 +1,9 @@
 
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import {AnalyticsCurrentVisits} from '../components/example/example1'
-import {AnalyticsWidgetSummary} from '../components/example/example2'
-import {AnalyticsWebsiteVisits} from '../components/example/example3'
+import {AnalyticsCurrentVisits} from '../components/Example/example1'
+import {AnalyticsWidgetSummary} from '../components/Example/example2'
+import {AnalyticsWebsiteVisits} from '../components/Example/example3'
 import {Box} from '@mui/material';
 import '../index.css'
 

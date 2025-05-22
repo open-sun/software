@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Typography, ListItemButton, ListItemText, Divider } from '@mui/material';
-import AiTalk from '../components/smartcenter/aitalk';
-import ImageRecognizer from '../components/smartcenter/ImageRecognizer';
-import FarmingAdvice from '../components/smartcenter/FileRecognizer';
+import AiTalk from '../components/SmartCenter/AiTalk';
+import ImageRecognizer from '../components/SmartCenter/ImageRecognizer';
+import FarmingAdvice from '../components/SmartCenter/FileRecognizer';
 
 const SmartCenter: React.FC = () => {
   const [selectedFeature, setSelectedFeature] = useState('智能问答');

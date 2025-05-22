@@ -13,7 +13,7 @@ import {
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginSuccess } from "../components/AuthContext";
-import { login } from "../services/loginandre"; // 导入登录函数
+import { login } from "../services/login-register"; // 导入登录函数
 import '../App.css';
 // import {img} from '../../public/logo192.png'
 
@@ -30,7 +30,7 @@ const LoginPage: React.FC = () => {
     if (userData) {
       const { username, role } = JSON.parse(userData);
       dispatch(loginSuccess({ username, role }));
-      navigate("/maininfo");
+      navigate("/MainInfo");
     }
   }, [dispatch, navigate]);
 
@@ -47,7 +47,7 @@ const LoginPage: React.FC = () => {
       // 存储到 localStorage
       localStorage.setItem('user', JSON.stringify({ username, role }));
       dispatch(loginSuccess({ username, role })); // 调用登录成功的 action
-      navigate("/maininfo");
+      navigate("/MainInfo");
     } catch (error) {
       if (error instanceof Error) {
         console.error("登录失败:", error.message);
@@ -166,7 +166,7 @@ const LoginPage: React.FC = () => {
             </Grid>
               <Grid size={{ xs: 12, md: 6, lg: 12 }}>
               <Typography variant="body2" align="center" sx={{ fontSize: '14px', color: '#333' }}>
-                没有账号？<Link href="/register" sx={{ color: '#1e90ff', textDecoration: 'underline' }}>立即注册</Link>
+                没有账号？<Link href="/Register" sx={{ color: '#1e90ff', textDecoration: 'underline' }}>立即注册</Link>
               </Typography>
             </Grid>
             {error && (

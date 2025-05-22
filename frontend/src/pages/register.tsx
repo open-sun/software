@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import {register}  from "../services/loginandre";
+import {register}  from "../services/login-register";
 import { loginSuccess } from "../components/AuthContext";
 import { useDispatch } from "react-redux";
 
@@ -36,7 +36,7 @@ const Register: React.FC = () => {
         throw new Error(response.message);
       }
       dispatch(loginSuccess({ username, role }));
-      navigate("/maininfo");
+      navigate("/MainInfo");
     } catch (error) {
       if (error instanceof Error) {
         console.error("注册失败:", error.message);
@@ -174,7 +174,7 @@ const Register: React.FC = () => {
 
            <Grid size={{ xs: 12, md: 6, lg: 12 }}>
               <Typography variant="body2" align="center" sx={{ fontSize: '14px', color: '#333' }}>
-                已有账号？<Link href="/login" sx={{ color: '#1e90ff', textDecoration: 'underline' }}>去登录</Link>
+                已有账号？<Link href="/Login" sx={{ color: '#1e90ff', textDecoration: 'underline' }}>去登录</Link>
               </Typography>
             </Grid>
 

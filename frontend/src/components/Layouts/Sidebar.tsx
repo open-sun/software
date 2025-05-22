@@ -77,28 +77,28 @@ const Sidebar: React.FC = () => {
       <List sx={{ height: '80%', overflowY: 'auto' }}>
         {isAuthenticated && (
           <>
-            <ListItemButton component={Link} to="/maininfo" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
+            <ListItemButton component={Link} to="/MainInfo" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
               <ListItemIcon sx={{ color: '#fff' }}>
                 <InfoIcon />
               </ListItemIcon>
               <ListItemText primary="主要信息" />
             </ListItemButton>
 
-            <ListItemButton component={Link} to="/underwater" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
+            <ListItemButton component={Link} to="/Underwater" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
               <ListItemIcon sx={{ color: '#fff' }}>
                 <UnderwaterIcon />
               </ListItemIcon>
               <ListItemText primary="水下系统" />
             </ListItemButton>
 
-            <ListItemButton component={Link} to="/smartcenter" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
+            <ListItemButton component={Link} to="/SmartCenter" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
               <ListItemIcon sx={{ color: '#fff' }}>
                 <SmartToyIcon />
               </ListItemIcon>
               <ListItemText primary="智能中心" />
             </ListItemButton>
 
-            <ListItemButton component={Link} to="/datacenter" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
+            <ListItemButton component={Link} to="/DataCenter" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
               <ListItemIcon sx={{ color: '#fff' }}>
                 <DataUsageIcon />
               </ListItemIcon>
@@ -122,7 +122,7 @@ const Sidebar: React.FC = () => {
         )}
 
         {user?.role === 'admin' && (
-          <ListItemButton component={Link} to="/management" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
+          <ListItemButton component={Link} to="/AdminCenter" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
             <ListItemIcon sx={{ color: '#fff' }}>
               <AdminPanelSettingsIcon />
             </ListItemIcon>
@@ -130,7 +130,7 @@ const Sidebar: React.FC = () => {
           </ListItemButton>
         )}
 
-        <ListItemButton component={Link} to="/dashboard" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
+        <ListItemButton component={Link} to="/Dashboard" sx={{ '&:hover': { backgroundColor: '#34495E' } }}>
           <ListItemIcon sx={{ color: '#fff' }}>
             <DashboardIcon />
           </ListItemIcon>

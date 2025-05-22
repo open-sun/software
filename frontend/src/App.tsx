@@ -4,17 +4,17 @@ import { useDispatch } from "react-redux";
 import { loginSuccess } from './components/AuthContext'; // 导入 loginSuccess
 import Home from './pages/Home'
 import Header from './components/Layouts/Header'
-import Login from './pages/login'
-import Register from './pages/register'
-import MainInfo from './pages/maininfo'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import MainInfo from './pages/MainInfo'
 import AdminCenter from './pages/AdminCenter';
 import WaterDataViewer from './pages/WaterDataViewer';
 import MapTest from './pages/MapTest';
 import UnderwaterSystem from './pages/UnderwaterSystem';
-import Datacenter from './pages/datacenter';
+import Datacenter from './pages/DataCenter';
 import WaterQuality from './pages/WaterQuality';
 import LineArea from './pages/LineArea';
-import Dashboard from './pages/dashboard';
+import Dashboard from './pages/DashBoard';
 import Layout from './components/Layouts/Layout';
 import SmartCenter from './pages/SmartCenter';
 
@@ -49,21 +49,21 @@ const App: React.FC = () => {
     <Router>
       <Routes>
         {/* 使用 AuthLayout 的页面 */}
-        <Route path="/login" element={<AuthLayout><Login /></AuthLayout>} />
-        <Route path="/register" element={<AuthLayout><Register /></AuthLayout>} />
+        <Route path="/Login" element={<AuthLayout><Login /></AuthLayout>} />
+        <Route path="/Register" element={<AuthLayout><Register /></AuthLayout>} />
 
         {/* 使用完整 Layout 的页面 */}
         <Route path="/" element={<Layout><Home /></Layout>} />
-        <Route path="/maininfo" element={<Layout><MainInfo /></Layout>} />
-        <Route path="/underwater" element={<Layout><UnderwaterSystem /></Layout>} />
-        <Route path="/datacenter" element={<Layout><Datacenter /></Layout>} />
+        <Route path="/MainInfo" element={<Layout><MainInfo /></Layout>} />
+        <Route path="/Underwater" element={<Layout><UnderwaterSystem /></Layout>} />
+        <Route path="/DataCenter" element={<Layout><Datacenter /></Layout>} />
         <Route path="/WaterDataViewer" element={<Layout><WaterDataViewer /></Layout>} />
         <Route path="/MapTest" element={<Layout><MapTest /></Layout>} />
-        <Route path="/management" element={<Layout><AdminCenter /></Layout>} />
-        <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-        <Route path="/smartcenter" element={<Layout><SmartCenter /></Layout>} />
-        <Route path="/waterquality" element={<Layout><WaterQuality /></Layout>} />
-        <Route path="/linearea" element={<Layout><LineArea /></Layout>} />
+        <Route path="/AdminCenter" element={<Layout><AdminCenter /></Layout>} />
+        <Route path="/Dashboard" element={<Layout><Dashboard /></Layout>} />
+        <Route path="/SmartCenter" element={<Layout><SmartCenter /></Layout>} />
+        <Route path="/WaterQuality" element={<Layout><WaterQuality /></Layout>} />
+        <Route path="/LineArea" element={<Layout><LineArea /></Layout>} />
       </Routes>
     </Router>
   );
