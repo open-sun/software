@@ -18,7 +18,7 @@ cat > backend/.env <<EOF
 ZHIPUAI_API_KEY=2fb8ce7647eb491db91be7d8b6650be6.vJ2aSN6frXXn4qlY
 
 # 数据库密码
-DB_PASSWORD=989739
+DB_PASSWORD=123456
 EOF
 
 echo "backend/.env 文件已生成。"
