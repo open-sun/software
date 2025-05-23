@@ -1,14 +1,30 @@
 // Header.tsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Avatar, ListItemButton, ListItemText, ListItemIcon, Divider, Box } from '@mui/material';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Avatar,
+  Box,
+  IconButton,
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store';
 import { logout } from '../AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
-import { Link } from 'react-router-dom';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  handleDrawerToggle?: () => void;
+  isMobile?: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, isMobile }) => {
   const user = useSelector((state: RootState) => state.auth.user);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const dispatch = useDispatch();
@@ -20,67 +36,61 @@ const Header: React.FC = () => {
   };
 
   function stringAvatar(name: string) {
-    return {
-      children: name.charAt(0),
-    };
+    return { children: name.charAt(0).toUpperCase() };
   }
 
   return (
     <AppBar position="static" sx={{ backgroundColor: '#007bff' }}>
       <Toolbar>
-        {/* Only show "Home" button if the user is not authenticated */}
+        {/* 仅在 isMobile 为 true 时显示按钮 */}
+        {isMobile && handleDrawerToggle && (
+          <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
+            <MenuIcon />
+          </IconButton>
+        )}
+
         {!isAuthenticated && (
-          <Box sx={{ 
-            display: 'flex',
-            alignItems: 'center',
-            flexGrow: 1,  //占据剩余空间
-            maxWidth: 'fit-content' // 限制为内容宽度
-          }}>
-            <ListItemButton 
-              component={Link} 
-              to="/" 
-              sx={{ 
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <ListItemButton
+              component={Link}
+              to="/"
+              sx={{
                 '&:hover': { backgroundColor: '#34495E' },
                 padding: '8px 16px',
-                borderRadius: '4px'
+                borderRadius: '4px',
               }}
             >
               <ListItemIcon sx={{ color: '#fff', minWidth: '36px' }}>
                 <HomeIcon />
               </ListItemIcon>
-              <ListItemText 
-                primary="首页" 
-                sx={{ 
-                  '& .MuiTypography-root': { 
+              <ListItemText
+                primary="首页"
+                sx={{
+                  '& .MuiTypography-root': {
                     fontSize: '0.875rem',
-                    whiteSpace: 'nowrap'
-                  } 
-                }} 
+                    whiteSpace: 'nowrap',
+                    color: 'white',
+                  },
+                }}
               />
             </ListItemButton>
           </Box>
         )}
 
-        {/* 右侧用户信息 */}
-        <Box sx={{ 
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          marginLeft: 'auto' // 自动左外边距推至最右
-        }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: 'auto' }}>
           {isAuthenticated ? (
             <>
               <Avatar {...stringAvatar(user?.username || 'U')} />
               <Typography sx={{ color: 'white', fontSize: '0.875rem' }}>
                 {user?.username || 'Unknown'}
               </Typography>
-              <Button 
-                onClick={handleLogout} 
-                sx={{ 
+              <Button
+                onClick={handleLogout}
+                sx={{
                   color: 'white',
                   '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.1)'
-                  }
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  },
                 }}
               >
                 登出
