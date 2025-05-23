@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, ListItemButton, ListItemText, Divider } from '@mui/material';
+import { Box, Typography, ListItemButton, ListItemText, Divider, useMediaQuery, useTheme } from '@mui/material';
 import AiTalk from '../components/SmartCenter/AiTalk';
 import ImageRecognizer from '../components/SmartCenter/ImageRecognizer';
 import FarmingAdvice from '../components/SmartCenter/FileRecognizer';
@@ -13,14 +13,36 @@ const SmartCenter: React.FC = () => {
     setSelectedFeature(feature);
   };
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // 手机屏幕判断
+
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f0f4f8', p: 4 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row', // 手机时上下排布，桌面时左右排布
+        minHeight: '100vh',
+        backgroundColor: '#f0f4f8',
+        p: isMobile ? 2 : 4,
+      }}
+    >
       {/* 左侧菜单栏 */}
-      <Box sx={{ width: '20%', backgroundColor: '#ffffff', p: 2, borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
-        <Typography variant="h5" sx={{ mb: 2, color: '#1976d2', fontWeight: 'bold' }}>智能中心</Typography>
+      <Box
+        sx={{
+          width: isMobile ? '100%' : '20%',
+          backgroundColor: '#ffffff',
+          p: 2,
+          borderRadius: '12px',
+          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+          mb: isMobile ? 2 : 0, // 手机时底部间距，避免和内容区紧贴
+        }}
+      >
+        <Typography variant="h5" sx={{ mb: 2, color: '#1976d2', fontWeight: 'bold' }}>
+          智能中心
+        </Typography>
         {features.map((feature) => (
-          <ListItemButton 
-            key={feature} 
+          <ListItemButton
+            key={feature}
             onClick={() => handleSelectFeature(feature)}
             sx={{
               backgroundColor: selectedFeature === feature ? '#e3f2fd' : 'transparent',
@@ -31,14 +53,29 @@ const SmartCenter: React.FC = () => {
               },
             }}
           >
-            <ListItemText primary={feature} sx={{ color: '#1976d2', fontWeight: selectedFeature === feature ? 'bold' : 'normal' }} />
+            <ListItemText
+              primary={feature}
+              sx={{ color: '#1976d2', fontWeight: selectedFeature === feature ? 'bold' : 'normal' }}
+            />
           </ListItemButton>
         ))}
       </Box>
 
       {/* 右侧功能展示区 */}
-      <Box sx={{ flex: 1, ml: 4, backgroundColor: '#ffffff', p: 3, borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
-        <Typography variant="h5" sx={{ mb: 2, color: '#1976d2' }}>{selectedFeature}</Typography>
+      <Box
+        sx={{
+          flex: 1,
+          ml: isMobile ? 0 : 4,
+          backgroundColor: '#ffffff',
+          p: 3,
+          borderRadius: '12px',
+          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+          width: isMobile ? '100%' : 'auto',
+        }}
+      >
+        <Typography variant="h5" sx={{ mb: 2, color: '#1976d2' }}>
+          {selectedFeature}
+        </Typography>
         <Divider sx={{ mb: 2 }} />
         <Box>
           {selectedFeature === '智能问答' && <AiTalk />}
