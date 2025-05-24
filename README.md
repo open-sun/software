@@ -50,13 +50,52 @@ npm start
 │   ├── 软件开发文档草稿/ # 项目文档初稿
 │   └── 规范.md      # 编码规范与项目统一约定
 ├── frontend
+│   ├── node_modules # npm 安装的依赖包
 │   ├── public 
+│   │   ├── favicon.ico # 网站图标
+│   │   ├── index.html # HTML 模板文件
+│   │   └── manifest.json # PWA 配置文件
 │   ├── src # 前端源代码
-│       ├── components # 组件  
-│       ├── pages # 页面
-│       ├── App.tsx # 入口文件
-│       ├── index.tsx # 渲染入口
-│   ├── package.json # 前端依赖
+│   │   ├── assets # 存放静态资源（如图片、字体等）
+│   │   │   ├── images # 图片资源
+│   │   │   └── fonts # 字体资源
+│   │   ├── components # 可复用组件
+│   │   │   ├── example # 示例组件
+│   │   │   ├── AnimatedTextChart.tsx
+│   │   │   ├── AuthContext.tsx
+│   │   │   ├── Header.tsx
+│   │   │   ├── HoverRainfallChart.tsx
+│   │   │   ├── Layout.tsx
+│   │   │   ├── LineAreaChart.tsx
+│   │   │   ├── MarketDataTable.tsx
+│   │   │   ├── RainfallChart.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── WeatherCard.tsx
+│   │   ├── pages # 页面组件
+│   │   │   ├── dashboard.tsx
+│   │   │   ├── datacenter.tsx
+│   │   │   ├── Home.tsx
+│   │   │   ├── LineArea.tsx
+│   │   │   ├── login.tsx
+│   │   │   ├── maininfo.tsx
+│   │   │   ├── management.tsx
+│   │   │   ├── MapTest.tsx
+│   │   │   ├── MarketData.tsx
+│   │   │   ├── register.tsx
+│   │   │   ├── UnderwaterSystem.tsx
+│   │   │   ├── WaterDataViewer.tsx
+│   │   │   └── WaterQuality.tsx
+│   │   ├── services # 服务层（API 请求等）
+│   │   ├── App.css # 全局样式文件
+│   │   ├── App.test.tsx # App 组件测试文件
+│   │   ├── App.tsx # 应用入口组件
+│   │   ├── index.css # 样式文件
+│   │   ├── index.tsx # 渲染入口文件
+│   │   └── logo.svg # logo 图标
+│   ├── package.json # 前端依赖配置文件
+│   ├── .gitignore # git 忽略文件配置
+│   ├── README.md # 项目说明文档
+│   └── tsconfig.json # TypeScript 配置文件
 ├── .gitignore       # Git 忽略配置
 
 ```

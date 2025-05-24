@@ -27,10 +27,10 @@ const Home: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           智慧海洋牧场可视化系统
         </Typography>
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1">
           本系统基于物联网与大数据技术，实现对海洋牧场环境参数的实时监测与可视化展示。通过整合水质监测、生物行为追踪、生态预警等模块，为海洋资源管理提供科学决策支持。
         </Typography>
-        <Typography variant="body1" paragraph>
+        <Typography variant="body1" >
           系统具备多维度数据分析能力，支持环境异常自动预警、历史数据回溯、可视化图表展示等功能，助力实现海洋牧场的智能化管理和可持续发展。
         </Typography>
       </Box>
@@ -71,7 +71,7 @@ const Home: React.FC = () => {
         <Button 
           component={Link}
           color="primary" 
-          to="/register"
+          to="/Register"
           sx={{ marginRight: 2 }}
         >
           注册
@@ -79,7 +79,7 @@ const Home: React.FC = () => {
         <Button 
            component={Link}
            color="primary" 
-           to="/login"
+           to="/Login"
         >
           登录
         </Button>

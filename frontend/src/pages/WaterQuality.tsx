@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as echarts from 'echarts';
 import { getJsonData } from '../services/DataGet';
-import { Box, FormControl, InputLabel, MenuItem, Select, Button, LinearProgress } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, Button, LinearProgress,Card } from '@mui/material';
 
 
 
@@ -307,7 +307,7 @@ setLoading(false);
 };
 
   return (
-    <Box sx={{ padding: '20px' }}>
+    <Card sx={{ padding: '20px' }}>
       {loading && <LinearProgress variant="determinate" value={progress} sx={{ mb: 2 }} />}
       <h1>水质数据页面</h1>
 
@@ -361,7 +361,7 @@ setLoading(false);
       </Box>
 
       <div ref={chartRef} style={{ width: '100%', height: '450px', backgroundColor: '#f5f5f5' }} />
-    </Box>
+    </Card>
   );
 };
 
