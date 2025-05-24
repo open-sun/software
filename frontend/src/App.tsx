@@ -11,7 +11,8 @@ import AdminCenter from './pages/AdminCenter';
 import WaterDataViewer from './pages/WaterDataViewer';
 import MapTest from './pages/MapTest';
 import UnderwaterSystem from './pages/UnderwaterSystem';
-import Datacenter from './pages/DataCenter';
+import DataCenter from './pages/DataCenter';
+import NewDataCenter from './pages/NewDataCenter';
 import WaterQuality from './pages/WaterQuality';
 import LineArea from './pages/LineArea';
 import Dashboard from './pages/DashBoard';
@@ -56,7 +57,8 @@ const App: React.FC = () => {
         <Route path="/" element={<Layout><Home /></Layout>} />
         <Route path="/MainInfo" element={<Layout><MainInfo /></Layout>} />
         <Route path="/Underwater" element={<Layout><UnderwaterSystem /></Layout>} />
-        <Route path="/DataCenter" element={<Layout><Datacenter /></Layout>} />
+        <Route path="/DataCenter" element={<Layout><NewDataCenter /></Layout>} />
+        <Route path="/OldDataCenter" element={<Layout><DataCenter /></Layout>} />
         <Route path="/WaterDataViewer" element={<Layout><WaterDataViewer /></Layout>} />
         <Route path="/MapTest" element={<Layout><MapTest /></Layout>} />
         <Route path="/AdminCenter" element={<Layout><AdminCenter /></Layout>} />

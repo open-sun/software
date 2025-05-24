@@ -44,7 +44,7 @@ interface CityWeatherMap {
   } | null;
 }
 
-const Datacenter: React.FC = () => {
+const DataCenter: React.FC = () => {
   const [weatherData, setWeatherData] = useState<CityWeatherMap>({});
   const [marketData, setMarketData] = useState<MarketData[]>([]);
   const [weatherLoading, setWeatherLoading] = useState(true);
@@ -457,4 +457,4 @@ const Datacenter: React.FC = () => {
   );
 };
 
-export default Datacenter;
+export default DataCenter;
