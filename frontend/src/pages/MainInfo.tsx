@@ -3,6 +3,8 @@ import { Typography, Box, Card, CardMedia, TextField, Button } from '@mui/materi
 import { getVideosByDate } from '../services/DataGet';
 import WaterQuality from './WaterQuality';
 import MapTest from './MapTest';
+import WeatherPanel from './WeatherPanel';
+import MarketPanel from './MarketPanel';
 
 const MainInfo: React.FC = () => {
   const [date, setDate] = useState('');
@@ -107,6 +109,13 @@ const MainInfo: React.FC = () => {
       </Box>
       <Box sx={{ mt: 4, p: 4, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)' }}>
         <MapTest />
+        </Box>
+      <Box sx={{ mt: 4, p: 4, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)' }}>
+        <WeatherPanel />
+
+        </Box>
+      <Box sx={{ mt: 4, p: 4, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)' }}>
+        <MarketPanel />
         </Box>
               
     </Box>
