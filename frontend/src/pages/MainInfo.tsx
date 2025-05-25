@@ -44,8 +44,8 @@ const MainInfo: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* 右侧 - 视频模块（查找和展示） */}
-        <Box sx={{ flex: '0 0 40%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* 右侧 - 视频模块（查找和展示）  这个地方其实没对齐 */}
+        <Box sx={{ flex: '0 0 38%', display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* 视频查找模块 */}
           <Box sx={{ backgroundColor: '#ffffff', padding: 3, borderRadius: '12px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
             <Typography variant="h5" component="h2" gutterBottom>
