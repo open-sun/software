@@ -7,7 +7,7 @@ import {
     RadarComponent,
     GridComponent
 } from 'echarts/components';
-import { PieChart, RadarChart, GaugeChart } from 'echarts/charts';
+import { PieChart, RadarChart, GaugeChart, LineChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ComposeOption } from 'echarts/core';
 import type {
@@ -17,7 +17,8 @@ import type {
     PieSeriesOption,
     RadarSeriesOption,
     RadarComponentOption,
-    GaugeSeriesOption
+    GaugeSeriesOption,
+    LineSeriesOption
 } from 'echarts';
 
 // 注册必须的组件
@@ -30,6 +31,7 @@ echarts.use([
     RadarComponent,
     RadarChart,
     GaugeChart,
+    LineChart,
     CanvasRenderer
 ]);
 
@@ -41,6 +43,7 @@ type ECOption = ComposeOption<
     | RadarSeriesOption
     | RadarComponentOption
     | GaugeSeriesOption
+    | LineSeriesOption
 >;
 
 // 样式常量
@@ -106,6 +109,12 @@ interface GroupedFishData {
     [species: string]: ProcessedFishData[];
 }
 
+interface DistributionData {
+    mean: number;
+    stdDev: number;
+    points: Array<{ value: number; density: number }>;
+}
+
 // 颜色处理函数
 const hexToRgba = (hex: string, alpha: number): string => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -137,9 +146,14 @@ const UnderwaterSystem: React.FC = () => {
     const [groupedData, setGroupedData] = useState<GroupedFishData>({});
     const [selectedSpecies, setSelectedSpecies] = useState<string>('');
     const [hoveredSpecies, setHoveredSpecies] = useState<string | null>(null);
+    const [selectedDimension, setSelectedDimension] = useState<string>('Weight(g)');
+    const [selectedSpeciesForDistribution, setSelectedSpeciesForDistribution] = useState<string>('');
+    const [distributionData, setDistributionData] = useState<DistributionData | null>(null);
+
     const pieChartRef = useRef<HTMLDivElement>(null);
     const radarChartRef = useRef<HTMLDivElement>(null);
     const gaugeChartRef = useRef<HTMLDivElement>(null);
+    const distributionChartRef = useRef<HTMLDivElement>(null);
 
     // 网箱信息
     const cageInfo = {
@@ -158,6 +172,16 @@ const UnderwaterSystem: React.FC = () => {
         conductivity: 480
     });
 
+    // 维度列表
+    const DIMENSIONS = [
+        'Weight(g)',
+        'Length1(cm)',
+        'Length2(cm)',
+        'Length3(cm)',
+        'Height(cm)',
+        'Width(cm)'
+    ];
+
     // PH值动态变化
     useEffect(() => {
         const phInterval = setInterval(() => {
@@ -168,7 +192,7 @@ const UnderwaterSystem: React.FC = () => {
                         .toFixed(1)
                 )
             }));
-        }, 1000);
+        }, 3000);
 
         return () => clearInterval(phInterval);
     }, []);
@@ -195,7 +219,38 @@ const UnderwaterSystem: React.FC = () => {
         }, {});
     }, []);
 
-    // 数据获取
+    // 生成正态分布数据（修改后）
+    const generateNormalDistributionData = (
+        species: string,
+        dimension: string,
+        groupedDataOverride?: GroupedFishData
+    ): DistributionData => {
+        const dataGroup = groupedDataOverride || groupedData;
+        const dataPoints = dataGroup[species]?.map(fish =>
+            parseFloat(fish[dimension as keyof ProcessedFishData]?.toString() || "0")
+        ) || [];
+
+        const mean = dataPoints.reduce((a, b) => a + b, 0) / dataPoints.length;
+        const stdDev = Math.sqrt(
+            dataPoints.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / dataPoints.length
+        );
+
+        const points = [];
+        const min = Math.min(...dataPoints);
+        const max = Math.max(...dataPoints);
+        const step = (max - min) / 100;
+
+        for (let x = min - 3 * stdDev; x <= max + 3 * stdDev; x += step) {
+            const density =
+                (1 / (stdDev * Math.sqrt(2 * Math.PI))) *
+                Math.exp(-Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2)));
+            points.push({ value: x, density });
+        }
+
+        return { mean, stdDev, points };
+    };
+
+    // 数据获取（修改后）
     const fetchFishData = useCallback(async () => {
         try {
             const response = await fetch('http://localhost:5000/api/fishdata');
@@ -211,11 +266,120 @@ const UnderwaterSystem: React.FC = () => {
 
             setProcessedData(cleanedData);
             setGroupedData(grouped);
-            setSelectedSpecies(Object.keys(grouped)[0] || '');
+
+            // 设置初始选中物种
+            const initialSpecies = Object.keys(grouped)[0] || '';
+            setSelectedSpecies(initialSpecies);
+            setSelectedSpeciesForDistribution(initialSpecies);
+
+            // 生成初始分布数据（使用本地grouped变量）
+            if (initialSpecies) {
+                const initialData = generateNormalDistributionData(
+                    initialSpecies,
+                    'Weight(g)',
+                    grouped  // 传入本地处理的分组数据
+                );
+                setDistributionData(initialData);
+            }
         } catch (error) {
             console.error('数据获取失败:', error);
         }
     }, [processRawData, groupBySpecies]);
+
+    // 处理维度选择
+    const handleDimensionSelect = (dimension: string) => {
+        setSelectedDimension(dimension);
+        if (selectedSpeciesForDistribution) {
+            const data = generateNormalDistributionData(selectedSpeciesForDistribution, dimension);
+            setDistributionData(data);
+        }
+    };
+
+    // 处理物种选择
+    const handleSpeciesSelect = (species: string) => {
+        setSelectedSpeciesForDistribution(species);
+        if (selectedDimension) {
+            const data = generateNormalDistributionData(species, selectedDimension);
+            setDistributionData(data);
+        }
+    };
+
+    // 正态分布图表初始化
+    useEffect(() => {
+        if (!distributionChartRef.current || !distributionData) return;
+
+        const myChart = echarts.init(distributionChartRef.current);
+        const speciesIndex = Object.keys(groupedData).indexOf(selectedSpeciesForDistribution);
+        const color = SPECIES_COLORS[speciesIndex % SPECIES_COLORS.length] || bluePalette.primary;
+
+        const option: ECOption = {
+            title: {
+                text: '正态分布分析',
+                left: 'center',
+                textStyle: {
+                    color: '#2d3a4b',
+                    fontSize: 16
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: (params: any) => {
+                    const data = params[0].data;
+                    return `值: ${data[0].toFixed(2)}<br/>密度: ${data[1].toFixed(4)}`;
+                }
+            },
+            xAxis: {
+                type: 'value',
+                name: selectedDimension,
+                axisLine: {
+                    lineStyle: {
+                        color: '#2d3a4b'
+                    }
+                },
+                splitLine: {
+                    show: false
+                }
+            },
+            yAxis: {
+                type: 'value',
+                name: '概率密度',
+                axisLine: {
+                    lineStyle: {
+                        color: '#2d3a4b'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: '#eee'
+                    }
+                }
+            },
+            series: [{
+                type: 'line',
+                data: distributionData.points.map(p => [p.value, p.density]),
+                smooth: true,
+                lineStyle: {
+                    color: color,
+                    width: 2
+                },
+                areaStyle: {
+                    color: hexToRgba(color, 0.3)
+                },
+                symbol: 'none'
+            }],
+            grid: {
+                containLabel: true,
+                left: '60px',
+                right: '20px',
+                top: '50px',
+                bottom: '40px'
+            }
+        };
+
+        myChart.setOption(option);
+
+        return () => myChart.dispose();
+    }, [distributionData, selectedDimension, selectedSpeciesForDistribution]);
 
     // 仪表盘初始化
     useEffect(() => {
@@ -679,34 +843,116 @@ const UnderwaterSystem: React.FC = () => {
                 gridTemplateColumns: '1fr 1fr',
                 gap: '20px'
             }}>
-                {/* 左侧：数据集摘要 */}
+                {/* 分布分析卡片 */}
                 <div style={{ ...cardStyle, background: '#ffffff' }}>
-                    <h3 style={{ color: '#2d3a4b', marginBottom: '15px' }}>数据集摘要</h3>
-                    <ul style={{
-                        listStyle: 'none',
-                        paddingLeft: 0,
-                        marginBottom: '20px',
-                        fontSize: '16px'
-                    }}>
-                        <li style={infoItemStyle}>总样本数: {processedData.length}</li>
-                        <li style={infoItemStyle}>包含物种数: {Object.keys(groupedData).length}</li>
-                        <li style={infoItemStyle}>当前选中物种: {selectedSpecies || '未选择'}</li>
-                    </ul>
+                    <h3 style={{ color: '#2d3a4b', marginBottom: '15px' }}>分布分析</h3>
 
-                    <div>
-                        <h4 style={{ color: '#2d3a4b', marginBottom: '10px' }}>数据样例：</h4>
-                        <pre style={{
-                            backgroundColor: hexToRgba(bluePalette.primary, 0.1),
-                            padding: '15px',
-                            borderRadius: '6px',
-                            overflowX: 'auto',
-                            fontSize: '14px',
-                            lineHeight: '1.5',
-                            color: '#2d3a4b'
-                        }}>
-                            {JSON.stringify(processedData.slice(0, 2), null, 2)}
-                        </pre>
+                    {/* 物种选择按钮行 */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '10px',
+                        flexWrap: 'wrap',
+                        marginBottom: '20px'
+                    }}>
+                        {Object.keys(groupedData).map((species, index) => (
+                            <button
+                                key={species}
+                                onClick={() => handleSpeciesSelect(species)}
+                                style={{
+                                    padding: '6px 12px',
+                                    backgroundColor: selectedSpeciesForDistribution === species
+                                        ? SPECIES_COLORS[index % SPECIES_COLORS.length]
+                                        : hexToRgba(SPECIES_COLORS[index % SPECIES_COLORS.length], 0.1),
+                                    color: selectedSpeciesForDistribution === species ? 'white' : '#2d3a4b',
+                                    borderRadius: '20px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {species}
+                            </button>
+                        ))}
                     </div>
+
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                        {/* 维度选择侧边栏 */}
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                            minWidth: '120px'
+                        }}>
+                            {DIMENSIONS.map(dim => (
+                                <button
+                                    key={dim}
+                                    onClick={() => handleDimensionSelect(dim)}
+                                    style={{
+                                        padding: '8px',
+                                        textAlign: 'left',
+                                        backgroundColor: selectedDimension === dim
+                                            ? bluePalette.primary
+                                            : hexToRgba(bluePalette.primary, 0.1),
+                                        color: selectedDimension === dim ? 'white' : '#2d3a4b',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {dim}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* 分布图表 */}
+                        <div
+                            ref={distributionChartRef}
+                            style={{
+                                flex: 1,
+                                height: '400px',
+                                minWidth: '600px'
+                            }}
+                        >
+                            {!distributionData && (
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    height: '100%',
+                                    color: '#666'
+                                }}>
+                                    请先选择物种和维度
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* 统计信息 */}
+                    {distributionData && (
+                        <div style={{
+                            marginTop: '20px',
+                            padding: '15px',
+                            backgroundColor: hexToRgba(bluePalette.primary, 0.1),
+                            borderRadius: '8px'
+                        }}>
+                            <h4 style={{ color: '#2d3a4b', marginBottom: '10px' }}>统计参数</h4>
+                            <div style={{ display: 'flex', gap: '20px' }}>
+                                <div>
+                                    <span style={{ color: '#666' }}>均值: </span>
+                                    <span style={{ fontWeight: 'bold' }}>
+                                        {distributionData.mean.toFixed(2)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span style={{ color: '#666' }}>标准差: </span>
+                                    <span style={{ fontWeight: 'bold' }}>
+                                        {distributionData.stdDev.toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* 右侧：饼图 */}
