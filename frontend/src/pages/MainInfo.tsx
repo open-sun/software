@@ -24,8 +24,28 @@ const MainInfo: React.FC = () => {
     fetchVideos();
   };
 
+  const MIN_WIDTH = 56; // 收起时宽度
+  const MAX_WIDTH = 400; // 最大宽度
+  const DEFAULT_RATIO = 0.18; // 默认占页面宽度比例
+
   return (
-    <Box sx={{ p: 4, background: 'linear-gradient(135deg,rgb(247, 247, 247), #ffffff)', minHeight: '100vh' }}>
+      <Box
+    sx={{
+      p: { xs: 1, sm: 2, md: 4 },
+      background: 'linear-gradient(135deg,rgb(247, 247, 247), #ffffff)',
+      minHeight: '100vh',
+      width: {
+        xs: '100vw',
+        md: `calc(100vw - ${DEFAULT_RATIO * 100}vw)`, // 默认侧栏宽度
+        lg: `calc(100vw - ${MAX_WIDTH}px)`,            // 大屏最大侧栏宽度
+      },
+      maxWidth: 1600,
+      margin: '0 auto',
+      boxSizing: 'border-box',
+      overflowX: 'auto',
+      transition: 'width 0.3s',
+    }}
+  >
       {/* 上部分：左侧主要信息，右侧视频模块（查找和展示） */}
       <Box sx={{ display: 'flex', gap: 4, mb: 4 }}>
         {/* 左侧 - 主要信息 */}
@@ -107,17 +127,38 @@ const MainInfo: React.FC = () => {
         </Typography>
         <WaterQuality />
       </Box>
-      <Box sx={{ mt: 4, p: 4, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)' }}>
-        <MapTest />
+      
+      <Box sx={{ display: 'flex', gap: 4, mt: 4 }}>
+        {/* 水质地图展示区 */}
+        <Box
+          sx={{
+            p: 4,
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '12px',
+            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
+            width: '50%',
+          }}
+        >
+          <MapTest />
         </Box>
+        {/* 市场信息展示区 */}
+        <Box
+          sx={{
+            p: 4,
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '12px',
+            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
+            width: '50%',
+          }}
+        >
+          <MarketPanel />
+        </Box>
+      </Box>
+      {/* 天气信息展示区 */}
       <Box sx={{ mt: 4, p: 4, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)' }}>
         <WeatherPanel />
+      </Box>
 
-        </Box>
-      <Box sx={{ mt: 4, p: 4, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)' }}>
-        <MarketPanel />
-        </Box>
-              
     </Box>
   );
 };

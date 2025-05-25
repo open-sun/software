@@ -17,7 +17,7 @@ def get_market_prices():
         if not start_date:
             # 默认使用前一天作为查询日期，而不是当前日期
             from datetime import datetime, timedelta
-            yesterday = datetime.now() - timedelta(days=1)
+            yesterday = datetime.now() - timedelta(days=3)
             start_date = yesterday.strftime("%Y/%m/%d")
             print(f"未提供日期，使用前一天日期: {start_date}")
         
