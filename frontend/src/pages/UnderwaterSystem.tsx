@@ -49,30 +49,30 @@ const infoItemStyle: React.CSSProperties = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    color: '#e6f7ff'
+    color: '#2d3a4b'
 };
 
 const cardStyle: React.CSSProperties = {
     padding: '20px',
-    backgroundColor: '#1890ff',
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(24,144,255,0.2)',
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(24,144,255,0.15)',
     transition: 'all 0.3s ease',
     position: 'relative',
     overflow: 'hidden'
 };
 
 const bluePalette = {
-    light: '#69c0ff',
+    light: '#e6f7ff',
     primary: '#1890ff',
-    dark: '#0050b3',
-    gradient: 'linear-gradient(145deg, #1890ff 0%, #0050b3 100%)'
+    dark: '#2a6f9c',
+    gradient: 'linear-gradient(145deg, #f0f9ff 0%, #e6f7ff 100%)'
 };
 
 // 颜色配置
 const SPECIES_COLORS = [
-    '#8cc8ff', '#bae7ff', '#7cb305',
-    '#ffd666', '#ff9c6e', '#ff7875'
+    '#36a2eb', '#ff6384', '#4bc0c0',
+    '#ff9f40', '#9966ff', '#ffcd56'
 ];
 
 interface FishData {
@@ -168,7 +168,7 @@ const UnderwaterSystem: React.FC = () => {
                         .toFixed(1)
                 )
             }));
-        }, 3000);
+        }, 1000);
 
         return () => clearInterval(phInterval);
     }, []);
@@ -268,7 +268,7 @@ const UnderwaterSystem: React.FC = () => {
                     }
                 },
                 axisLabel: {
-                    color: '#e6f7ff',
+                    color: '#2d3a4b',
                     fontSize: 16,
                     distance: -60,
                     rotate: 'tangential',
@@ -283,7 +283,7 @@ const UnderwaterSystem: React.FC = () => {
                 title: {
                     offsetCenter: [0, '-10%'],
                     fontSize: 20,
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 },
                 detail: {
                     fontSize: 40,
@@ -292,7 +292,7 @@ const UnderwaterSystem: React.FC = () => {
                     formatter: function (value: number) {
                         return Math.round(value * 100) + '';
                     },
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 },
                 data: [{
                     value: 0.7,
@@ -328,7 +328,7 @@ const UnderwaterSystem: React.FC = () => {
                 subtext: `总样本数：${processedData.length}`,
                 left: 'center',
                 textStyle: {
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 }
             },
             tooltip: {
@@ -341,7 +341,7 @@ const UnderwaterSystem: React.FC = () => {
                 top: 'middle',
                 data: Object.keys(groupedData),
                 textStyle: {
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 }
             },
             series: [{
@@ -354,17 +354,17 @@ const UnderwaterSystem: React.FC = () => {
                     itemStyle: {
                         shadowBlur: 10,
                         shadowOffsetX: 0,
-                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        shadowColor: 'rgba(0, 0, 0, 0.2)'
                     }
                 },
                 label: {
                     show: true,
                     formatter: '{b}: {c} ({d}%)',
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 },
                 itemStyle: {
                     borderRadius: 5,
-                    borderColor: bluePalette.dark,
+                    borderColor: '#fff',
                     borderWidth: 2
                 }
             }]
@@ -423,7 +423,7 @@ const UnderwaterSystem: React.FC = () => {
                 text: `${selectedSpecies} 形态特征分析`,
                 left: 'center',
                 textStyle: {
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 }
             },
             tooltip: {
@@ -431,27 +431,27 @@ const UnderwaterSystem: React.FC = () => {
             },
             radar: {
                 indicator: [
-                    { name: '体重(g)', max: Math.ceil(Math.max(...speciesData.map(f => f['Weight(g)']))) * 1.1 },
-                    { name: '长度1(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length1(cm)']))) * 1.1 },
-                    { name: '长度2(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length2(cm)']))) * 1.1 },
-                    { name: '长度3(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length3(cm)']))) * 1.1 },
-                    { name: '高度(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Height(cm)']))) * 1.1 },
-                    { name: '宽度(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Width(cm)']))) * 1.1 }
+                    { name: '体重(g)', max: Math.ceil(Math.max(...speciesData.map(f => f['Weight(g)'])) * 1.1) },
+                    { name: '长度1(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length1(cm)'])) * 1.1) },
+                    { name: '长度2(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length2(cm)'])) * 1.1) },
+                    { name: '长度3(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length3(cm)'])) * 1.1) },
+                    { name: '高度(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Height(cm)'])) * 1.1) },
+                    { name: '宽度(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Width(cm)'])) * 1.1) }
                 ],
                 shape: 'polygon',
                 splitNumber: 5,
                 axisName: {
-                    color: '#e6f7ff',
+                    color: '#2d3a4b',
                     fontSize: 12
                 },
                 splitArea: {
                     areaStyle: {
-                        color: ['rgba(255,255,255,0.1)']
+                        color: ['rgba(24,144,255,0.05)']
                     }
                 },
                 axisLine: {
                     lineStyle: {
-                        color: 'rgba(255,255,255,0.3)'
+                        color: 'rgba(0,0,0,0.2)'
                     }
                 }
             },
@@ -465,10 +465,11 @@ const UnderwaterSystem: React.FC = () => {
                     },
                     lineStyle: {
                         color: color,
-                        width: 2
+                        width: 3
                     },
                     itemStyle: {
-                        color: color
+                        color: color,
+                        borderWidth: 2
                     }
                 }]
             }]
@@ -501,7 +502,7 @@ const UnderwaterSystem: React.FC = () => {
     };
 
     const getButtonColor = (species: string): string => {
-        return selectedSpecies === species ? 'white' : '#e6f7ff';
+        return selectedSpecies === species ? 'white' : '#2d3a4b';
     };
 
     // PH值颜色指示
@@ -532,10 +533,10 @@ const UnderwaterSystem: React.FC = () => {
         }}>
             <h2 style={{
                 textAlign: 'center',
-                color: '#e6f7ff',
+                color: '#2d3a4b',
                 marginBottom: '30px',
                 fontSize: '2.5rem',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+                textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
             }}>
                 水下生态系统监测平台
             </h2>
@@ -548,9 +549,9 @@ const UnderwaterSystem: React.FC = () => {
                 marginBottom: '20px'
             }}>
                 {/* 左侧：环境评分仪表盘 */}
-                <div style={{ ...cardStyle, background: bluePalette.dark }}>
+                <div style={{ ...cardStyle, background: '#f8fbff' }}>
                     <div ref={gaugeChartRef} style={{ width: '100%', height: '360px' }} />
-                    <div style={{ padding: '15px', color: '#e6f7ff' }}>
+                    <div style={{ padding: '15px', color: '#2d3a4b' }}>
                         <h3 style={{ marginBottom: '12px' }}>评分说明</h3>
                         <ul style={{ listStyle: 'none', paddingLeft: 0, fontSize: '14px' }}>
                             <li style={{ marginBottom: '8px' }}>A (90-100): 极佳生态环境</li>
@@ -565,11 +566,11 @@ const UnderwaterSystem: React.FC = () => {
                 </div>
 
                 {/* 中间：雷达图 */}
-                <div style={{ ...cardStyle, background: bluePalette.primary }}>
+                <div style={{ ...cardStyle, background: '#ffffff' }}>
                     <div style={{ marginBottom: '20px' }}>
                         <h3 style={{
                             textAlign: 'center',
-                            color: '#e6f7ff',
+                            color: '#2d3a4b',
                             marginBottom: '15px',
                             fontSize: '1.5rem'
                         }}>
@@ -617,8 +618,8 @@ const UnderwaterSystem: React.FC = () => {
 
                 {/* 右侧：网箱和传感器信息 */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ ...cardStyle, background: bluePalette.light }}>
-                        <h3 style={{ color: '#e6f7ff', marginBottom: '15px' }}>
+                    <div style={{ ...cardStyle, background: '#f0f9ff' }}>
+                        <h3 style={{ color: '#2d3a4b', marginBottom: '15px' }}>
                             <span style={{ marginRight: 10 }}>🌊</span>
                             网箱信息
                         </h3>
@@ -632,8 +633,8 @@ const UnderwaterSystem: React.FC = () => {
                         </ul>
                     </div>
 
-                    <div style={{ ...cardStyle, background: hexToRgba(bluePalette.primary, 0.8) }}>
-                        <h3 style={{ color: '#e6f7ff', marginBottom: '15px' }}>
+                    <div style={{ ...cardStyle, background: '#e6f7ff' }}>
+                        <h3 style={{ color: '#2d3a4b', marginBottom: '15px' }}>
                             <span style={{ marginRight: 10 }}>🌡️</span>
                             传感器数据
                         </h3>
@@ -653,7 +654,7 @@ const UnderwaterSystem: React.FC = () => {
                                     <span style={{
                                         marginLeft: '8px',
                                         fontSize: '12px',
-                                        color: '#e6f7ff'
+                                        color: '#2d3a4b'
                                     }}>
                                         ({getPHStatusText(sensorData.ph)})
                                     </span>
@@ -679,8 +680,8 @@ const UnderwaterSystem: React.FC = () => {
                 gap: '20px'
             }}>
                 {/* 左侧：数据集摘要 */}
-                <div style={{ ...cardStyle, background: bluePalette.primary }}>
-                    <h3 style={{ color: '#e6f7ff', marginBottom: '15px' }}>数据集摘要</h3>
+                <div style={{ ...cardStyle, background: '#ffffff' }}>
+                    <h3 style={{ color: '#2d3a4b', marginBottom: '15px' }}>数据集摘要</h3>
                     <ul style={{
                         listStyle: 'none',
                         paddingLeft: 0,
@@ -693,15 +694,15 @@ const UnderwaterSystem: React.FC = () => {
                     </ul>
 
                     <div>
-                        <h4 style={{ color: '#e6f7ff', marginBottom: '10px' }}>数据样例：</h4>
+                        <h4 style={{ color: '#2d3a4b', marginBottom: '10px' }}>数据样例：</h4>
                         <pre style={{
-                            backgroundColor: hexToRgba(bluePalette.dark, 0.6),
+                            backgroundColor: hexToRgba(bluePalette.primary, 0.1),
                             padding: '15px',
                             borderRadius: '6px',
                             overflowX: 'auto',
                             fontSize: '14px',
                             lineHeight: '1.5',
-                            color: '#e6f7ff'
+                            color: '#2d3a4b'
                         }}>
                             {JSON.stringify(processedData.slice(0, 2), null, 2)}
                         </pre>
@@ -709,7 +710,7 @@ const UnderwaterSystem: React.FC = () => {
                 </div>
 
                 {/* 右侧：饼图 */}
-                <div style={{ ...cardStyle, background: bluePalette.dark }}>
+                <div style={{ ...cardStyle, background: '#f8fbff' }}>
                     <div
                         ref={pieChartRef}
                         style={{
