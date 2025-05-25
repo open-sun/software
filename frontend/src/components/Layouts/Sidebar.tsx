@@ -172,14 +172,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, mobileOpen, handleDrawerTog
               <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}><DataUsageIcon /></ListItemIcon>
               {!collapsed && <ListItemText primary="数据中心" />}
             </ListItemButton>
-            <ListItemButton component={Link} to="/WaterDataViewer" sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}><SearchIcon /></ListItemIcon>
-              {!collapsed && <ListItemText primary="测试" />}
-            </ListItemButton>
-            <ListItemButton component={Link} to="/MapTest" sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}><MapIcon /></ListItemIcon>
-              {!collapsed && <ListItemText primary="地图" />}
-            </ListItemButton>
           </>
         )}
         {user?.role === 'admin' && (
@@ -188,10 +180,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, mobileOpen, handleDrawerTog
             {!collapsed && <ListItemText primary="管理中心" />}
           </ListItemButton>
         )}
-        <ListItemButton component={Link} to="/Dashboard" sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-          <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}><DashboardIcon /></ListItemIcon>
-          {!collapsed && <ListItemText primary="测试布局" />}
-        </ListItemButton>
       </List>
     </Box>
   );
