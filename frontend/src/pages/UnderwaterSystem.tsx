@@ -7,7 +7,7 @@ import {
     RadarComponent,
     GridComponent
 } from 'echarts/components';
-import { PieChart, RadarChart, GaugeChart } from 'echarts/charts';
+import { PieChart, RadarChart, GaugeChart, LineChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ComposeOption } from 'echarts/core';
 import type {
@@ -17,7 +17,8 @@ import type {
     PieSeriesOption,
     RadarSeriesOption,
     RadarComponentOption,
-    GaugeSeriesOption
+    GaugeSeriesOption,
+    LineSeriesOption
 } from 'echarts';
 
 // 注册必须的组件
@@ -30,6 +31,7 @@ echarts.use([
     RadarComponent,
     RadarChart,
     GaugeChart,
+    LineChart,
     CanvasRenderer
 ]);
 
@@ -41,6 +43,7 @@ type ECOption = ComposeOption<
     | RadarSeriesOption
     | RadarComponentOption
     | GaugeSeriesOption
+    | LineSeriesOption
 >;
 
 // 样式常量
@@ -49,30 +52,30 @@ const infoItemStyle: React.CSSProperties = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    color: '#e6f7ff'
+    color: '#2d3a4b'
 };
 
 const cardStyle: React.CSSProperties = {
     padding: '20px',
-    backgroundColor: '#1890ff',
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(24,144,255,0.2)',
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(24,144,255,0.15)',
     transition: 'all 0.3s ease',
     position: 'relative',
     overflow: 'hidden'
 };
 
 const bluePalette = {
-    light: '#69c0ff',
+    light: '#e6f7ff',
     primary: '#1890ff',
-    dark: '#0050b3',
-    gradient: 'linear-gradient(145deg, #1890ff 0%, #0050b3 100%)'
+    dark: '#2a6f9c',
+    gradient: 'linear-gradient(145deg, #f0f9ff 0%, #e6f7ff 100%)'
 };
 
 // 颜色配置
 const SPECIES_COLORS = [
-    '#8cc8ff', '#bae7ff', '#7cb305',
-    '#ffd666', '#ff9c6e', '#ff7875'
+    '#36a2eb', '#ff6384', '#4bc0c0',
+    '#ff9f40', '#9966ff', '#ffcd56'
 ];
 
 interface FishData {
@@ -106,6 +109,12 @@ interface GroupedFishData {
     [species: string]: ProcessedFishData[];
 }
 
+interface DistributionData {
+    mean: number;
+    stdDev: number;
+    points: Array<{ value: number; density: number }>;
+}
+
 // 颜色处理函数
 const hexToRgba = (hex: string, alpha: number): string => {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -137,9 +146,14 @@ const UnderwaterSystem: React.FC = () => {
     const [groupedData, setGroupedData] = useState<GroupedFishData>({});
     const [selectedSpecies, setSelectedSpecies] = useState<string>('');
     const [hoveredSpecies, setHoveredSpecies] = useState<string | null>(null);
+    const [selectedDimension, setSelectedDimension] = useState<string>('Weight(g)');
+    const [selectedSpeciesForDistribution, setSelectedSpeciesForDistribution] = useState<string>('');
+    const [distributionData, setDistributionData] = useState<DistributionData | null>(null);
+
     const pieChartRef = useRef<HTMLDivElement>(null);
     const radarChartRef = useRef<HTMLDivElement>(null);
     const gaugeChartRef = useRef<HTMLDivElement>(null);
+    const distributionChartRef = useRef<HTMLDivElement>(null);
 
     // 网箱信息
     const cageInfo = {
@@ -157,6 +171,16 @@ const UnderwaterSystem: React.FC = () => {
         dissolvedOxygen: 6.2,
         conductivity: 480
     });
+
+    // 维度列表
+    const DIMENSIONS = [
+        'Weight(g)',
+        'Length1(cm)',
+        'Length2(cm)',
+        'Length3(cm)',
+        'Height(cm)',
+        'Width(cm)'
+    ];
 
     // PH值动态变化
     useEffect(() => {
@@ -195,7 +219,38 @@ const UnderwaterSystem: React.FC = () => {
         }, {});
     }, []);
 
-    // 数据获取
+    // 生成正态分布数据（修改后）
+    const generateNormalDistributionData = (
+        species: string,
+        dimension: string,
+        groupedDataOverride?: GroupedFishData
+    ): DistributionData => {
+        const dataGroup = groupedDataOverride || groupedData;
+        const dataPoints = dataGroup[species]?.map(fish =>
+            parseFloat(fish[dimension as keyof ProcessedFishData]?.toString() || "0")
+        ) || [];
+
+        const mean = dataPoints.reduce((a, b) => a + b, 0) / dataPoints.length;
+        const stdDev = Math.sqrt(
+            dataPoints.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / dataPoints.length
+        );
+
+        const points = [];
+        const min = Math.min(...dataPoints);
+        const max = Math.max(...dataPoints);
+        const step = (max - min) / 100;
+
+        for (let x = min - 3 * stdDev; x <= max + 3 * stdDev; x += step) {
+            const density =
+                (1 / (stdDev * Math.sqrt(2 * Math.PI))) *
+                Math.exp(-Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2)));
+            points.push({ value: x, density });
+        }
+
+        return { mean, stdDev, points };
+    };
+
+    // 数据获取（修改后）
     const fetchFishData = useCallback(async () => {
         try {
             const response = await fetch('http://localhost:5000/api/fishdata');
@@ -211,11 +266,120 @@ const UnderwaterSystem: React.FC = () => {
 
             setProcessedData(cleanedData);
             setGroupedData(grouped);
-            setSelectedSpecies(Object.keys(grouped)[0] || '');
+
+            // 设置初始选中物种
+            const initialSpecies = Object.keys(grouped)[0] || '';
+            setSelectedSpecies(initialSpecies);
+            setSelectedSpeciesForDistribution(initialSpecies);
+
+            // 生成初始分布数据（使用本地grouped变量）
+            if (initialSpecies) {
+                const initialData = generateNormalDistributionData(
+                    initialSpecies,
+                    'Weight(g)',
+                    grouped  // 传入本地处理的分组数据
+                );
+                setDistributionData(initialData);
+            }
         } catch (error) {
             console.error('数据获取失败:', error);
         }
     }, [processRawData, groupBySpecies]);
+
+    // 处理维度选择
+    const handleDimensionSelect = (dimension: string) => {
+        setSelectedDimension(dimension);
+        if (selectedSpeciesForDistribution) {
+            const data = generateNormalDistributionData(selectedSpeciesForDistribution, dimension);
+            setDistributionData(data);
+        }
+    };
+
+    // 处理物种选择
+    const handleSpeciesSelect = (species: string) => {
+        setSelectedSpeciesForDistribution(species);
+        if (selectedDimension) {
+            const data = generateNormalDistributionData(species, selectedDimension);
+            setDistributionData(data);
+        }
+    };
+
+    // 正态分布图表初始化
+    useEffect(() => {
+        if (!distributionChartRef.current || !distributionData) return;
+
+        const myChart = echarts.init(distributionChartRef.current);
+        const speciesIndex = Object.keys(groupedData).indexOf(selectedSpeciesForDistribution);
+        const color = SPECIES_COLORS[speciesIndex % SPECIES_COLORS.length] || bluePalette.primary;
+
+        const option: ECOption = {
+            title: {
+                text: '正态分布分析',
+                left: 'center',
+                textStyle: {
+                    color: '#2d3a4b',
+                    fontSize: 16
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                formatter: (params: any) => {
+                    const data = params[0].data;
+                    return `值: ${data[0].toFixed(2)}<br/>密度: ${data[1].toFixed(4)}`;
+                }
+            },
+            xAxis: {
+                type: 'value',
+                name: selectedDimension,
+                axisLine: {
+                    lineStyle: {
+                        color: '#2d3a4b'
+                    }
+                },
+                splitLine: {
+                    show: false
+                }
+            },
+            yAxis: {
+                type: 'value',
+                name: '概率密度',
+                axisLine: {
+                    lineStyle: {
+                        color: '#2d3a4b'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: '#eee'
+                    }
+                }
+            },
+            series: [{
+                type: 'line',
+                data: distributionData.points.map(p => [p.value, p.density]),
+                smooth: true,
+                lineStyle: {
+                    color: color,
+                    width: 2
+                },
+                areaStyle: {
+                    color: hexToRgba(color, 0.3)
+                },
+                symbol: 'none'
+            }],
+            grid: {
+                containLabel: true,
+                left: '60px',
+                right: '20px',
+                top: '50px',
+                bottom: '40px'
+            }
+        };
+
+        myChart.setOption(option);
+
+        return () => myChart.dispose();
+    }, [distributionData, selectedDimension, selectedSpeciesForDistribution]);
 
     // 仪表盘初始化
     useEffect(() => {
@@ -268,7 +432,7 @@ const UnderwaterSystem: React.FC = () => {
                     }
                 },
                 axisLabel: {
-                    color: '#e6f7ff',
+                    color: '#2d3a4b',
                     fontSize: 16,
                     distance: -60,
                     rotate: 'tangential',
@@ -283,7 +447,7 @@ const UnderwaterSystem: React.FC = () => {
                 title: {
                     offsetCenter: [0, '-10%'],
                     fontSize: 20,
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 },
                 detail: {
                     fontSize: 40,
@@ -292,7 +456,7 @@ const UnderwaterSystem: React.FC = () => {
                     formatter: function (value: number) {
                         return Math.round(value * 100) + '';
                     },
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 },
                 data: [{
                     value: 0.7,
@@ -328,7 +492,7 @@ const UnderwaterSystem: React.FC = () => {
                 subtext: `总样本数：${processedData.length}`,
                 left: 'center',
                 textStyle: {
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 }
             },
             tooltip: {
@@ -341,7 +505,7 @@ const UnderwaterSystem: React.FC = () => {
                 top: 'middle',
                 data: Object.keys(groupedData),
                 textStyle: {
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 }
             },
             series: [{
@@ -354,17 +518,17 @@ const UnderwaterSystem: React.FC = () => {
                     itemStyle: {
                         shadowBlur: 10,
                         shadowOffsetX: 0,
-                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        shadowColor: 'rgba(0, 0, 0, 0.2)'
                     }
                 },
                 label: {
                     show: true,
                     formatter: '{b}: {c} ({d}%)',
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 },
                 itemStyle: {
                     borderRadius: 5,
-                    borderColor: bluePalette.dark,
+                    borderColor: '#fff',
                     borderWidth: 2
                 }
             }]
@@ -423,7 +587,7 @@ const UnderwaterSystem: React.FC = () => {
                 text: `${selectedSpecies} 形态特征分析`,
                 left: 'center',
                 textStyle: {
-                    color: '#e6f7ff'
+                    color: '#2d3a4b'
                 }
             },
             tooltip: {
@@ -431,27 +595,27 @@ const UnderwaterSystem: React.FC = () => {
             },
             radar: {
                 indicator: [
-                    { name: '体重(g)', max: Math.ceil(Math.max(...speciesData.map(f => f['Weight(g)']))) * 1.1 },
-                    { name: '长度1(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length1(cm)']))) * 1.1 },
-                    { name: '长度2(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length2(cm)']))) * 1.1 },
-                    { name: '长度3(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length3(cm)']))) * 1.1 },
-                    { name: '高度(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Height(cm)']))) * 1.1 },
-                    { name: '宽度(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Width(cm)']))) * 1.1 }
+                    { name: '体重(g)', max: Math.ceil(Math.max(...speciesData.map(f => f['Weight(g)'])) * 1.1) },
+                    { name: '长度1(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length1(cm)'])) * 1.1) },
+                    { name: '长度2(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length2(cm)'])) * 1.1) },
+                    { name: '长度3(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Length3(cm)'])) * 1.1) },
+                    { name: '高度(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Height(cm)'])) * 1.1) },
+                    { name: '宽度(cm)', max: Math.ceil(Math.max(...speciesData.map(f => f['Width(cm)'])) * 1.1) }
                 ],
                 shape: 'polygon',
                 splitNumber: 5,
                 axisName: {
-                    color: '#e6f7ff',
+                    color: '#2d3a4b',
                     fontSize: 12
                 },
                 splitArea: {
                     areaStyle: {
-                        color: ['rgba(255,255,255,0.1)']
+                        color: ['rgba(24,144,255,0.05)']
                     }
                 },
                 axisLine: {
                     lineStyle: {
-                        color: 'rgba(255,255,255,0.3)'
+                        color: 'rgba(0,0,0,0.2)'
                     }
                 }
             },
@@ -465,10 +629,11 @@ const UnderwaterSystem: React.FC = () => {
                     },
                     lineStyle: {
                         color: color,
-                        width: 2
+                        width: 3
                     },
                     itemStyle: {
-                        color: color
+                        color: color,
+                        borderWidth: 2
                     }
                 }]
             }]
@@ -501,7 +666,7 @@ const UnderwaterSystem: React.FC = () => {
     };
 
     const getButtonColor = (species: string): string => {
-        return selectedSpecies === species ? 'white' : '#e6f7ff';
+        return selectedSpecies === species ? 'white' : '#2d3a4b';
     };
 
     // PH值颜色指示
@@ -532,10 +697,10 @@ const UnderwaterSystem: React.FC = () => {
         }}>
             <h2 style={{
                 textAlign: 'center',
-                color: '#e6f7ff',
+                color: '#2d3a4b',
                 marginBottom: '30px',
                 fontSize: '2.5rem',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+                textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
             }}>
                 水下生态系统监测平台
             </h2>
@@ -548,9 +713,9 @@ const UnderwaterSystem: React.FC = () => {
                 marginBottom: '20px'
             }}>
                 {/* 左侧：环境评分仪表盘 */}
-                <div style={{ ...cardStyle, background: bluePalette.dark }}>
+                <div style={{ ...cardStyle, background: '#f8fbff' }}>
                     <div ref={gaugeChartRef} style={{ width: '100%', height: '360px' }} />
-                    <div style={{ padding: '15px', color: '#e6f7ff' }}>
+                    <div style={{ padding: '15px', color: '#2d3a4b' }}>
                         <h3 style={{ marginBottom: '12px' }}>评分说明</h3>
                         <ul style={{ listStyle: 'none', paddingLeft: 0, fontSize: '14px' }}>
                             <li style={{ marginBottom: '8px' }}>A (90-100): 极佳生态环境</li>
@@ -565,11 +730,11 @@ const UnderwaterSystem: React.FC = () => {
                 </div>
 
                 {/* 中间：雷达图 */}
-                <div style={{ ...cardStyle, background: bluePalette.primary }}>
+                <div style={{ ...cardStyle, background: '#ffffff' }}>
                     <div style={{ marginBottom: '20px' }}>
                         <h3 style={{
                             textAlign: 'center',
-                            color: '#e6f7ff',
+                            color: '#2d3a4b',
                             marginBottom: '15px',
                             fontSize: '1.5rem'
                         }}>
@@ -617,8 +782,8 @@ const UnderwaterSystem: React.FC = () => {
 
                 {/* 右侧：网箱和传感器信息 */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ ...cardStyle, background: bluePalette.light }}>
-                        <h3 style={{ color: '#e6f7ff', marginBottom: '15px' }}>
+                    <div style={{ ...cardStyle, background: '#f0f9ff' }}>
+                        <h3 style={{ color: '#2d3a4b', marginBottom: '15px' }}>
                             <span style={{ marginRight: 10 }}>🌊</span>
                             网箱信息
                         </h3>
@@ -632,8 +797,8 @@ const UnderwaterSystem: React.FC = () => {
                         </ul>
                     </div>
 
-                    <div style={{ ...cardStyle, background: hexToRgba(bluePalette.primary, 0.8) }}>
-                        <h3 style={{ color: '#e6f7ff', marginBottom: '15px' }}>
+                    <div style={{ ...cardStyle, background: '#e6f7ff' }}>
+                        <h3 style={{ color: '#2d3a4b', marginBottom: '15px' }}>
                             <span style={{ marginRight: 10 }}>🌡️</span>
                             传感器数据
                         </h3>
@@ -653,7 +818,7 @@ const UnderwaterSystem: React.FC = () => {
                                     <span style={{
                                         marginLeft: '8px',
                                         fontSize: '12px',
-                                        color: '#e6f7ff'
+                                        color: '#2d3a4b'
                                     }}>
                                         ({getPHStatusText(sensorData.ph)})
                                     </span>
@@ -678,38 +843,120 @@ const UnderwaterSystem: React.FC = () => {
                 gridTemplateColumns: '1fr 1fr',
                 gap: '20px'
             }}>
-                {/* 左侧：数据集摘要 */}
-                <div style={{ ...cardStyle, background: bluePalette.primary }}>
-                    <h3 style={{ color: '#e6f7ff', marginBottom: '15px' }}>数据集摘要</h3>
-                    <ul style={{
-                        listStyle: 'none',
-                        paddingLeft: 0,
-                        marginBottom: '20px',
-                        fontSize: '16px'
-                    }}>
-                        <li style={infoItemStyle}>总样本数: {processedData.length}</li>
-                        <li style={infoItemStyle}>包含物种数: {Object.keys(groupedData).length}</li>
-                        <li style={infoItemStyle}>当前选中物种: {selectedSpecies || '未选择'}</li>
-                    </ul>
+                {/* 分布分析卡片 */}
+                <div style={{ ...cardStyle, background: '#ffffff' }}>
+                    <h3 style={{ color: '#2d3a4b', marginBottom: '15px' }}>分布分析</h3>
 
-                    <div>
-                        <h4 style={{ color: '#e6f7ff', marginBottom: '10px' }}>数据样例：</h4>
-                        <pre style={{
-                            backgroundColor: hexToRgba(bluePalette.dark, 0.6),
-                            padding: '15px',
-                            borderRadius: '6px',
-                            overflowX: 'auto',
-                            fontSize: '14px',
-                            lineHeight: '1.5',
-                            color: '#e6f7ff'
-                        }}>
-                            {JSON.stringify(processedData.slice(0, 2), null, 2)}
-                        </pre>
+                    {/* 物种选择按钮行 */}
+                    <div style={{
+                        display: 'flex',
+                        gap: '10px',
+                        flexWrap: 'wrap',
+                        marginBottom: '20px'
+                    }}>
+                        {Object.keys(groupedData).map((species, index) => (
+                            <button
+                                key={species}
+                                onClick={() => handleSpeciesSelect(species)}
+                                style={{
+                                    padding: '6px 12px',
+                                    backgroundColor: selectedSpeciesForDistribution === species
+                                        ? SPECIES_COLORS[index % SPECIES_COLORS.length]
+                                        : hexToRgba(SPECIES_COLORS[index % SPECIES_COLORS.length], 0.1),
+                                    color: selectedSpeciesForDistribution === species ? 'white' : '#2d3a4b',
+                                    borderRadius: '20px',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {species}
+                            </button>
+                        ))}
                     </div>
+
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                        {/* 维度选择侧边栏 */}
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                            minWidth: '120px'
+                        }}>
+                            {DIMENSIONS.map(dim => (
+                                <button
+                                    key={dim}
+                                    onClick={() => handleDimensionSelect(dim)}
+                                    style={{
+                                        padding: '8px',
+                                        textAlign: 'left',
+                                        backgroundColor: selectedDimension === dim
+                                            ? bluePalette.primary
+                                            : hexToRgba(bluePalette.primary, 0.1),
+                                        color: selectedDimension === dim ? 'white' : '#2d3a4b',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {dim}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* 分布图表 */}
+                        <div
+                            ref={distributionChartRef}
+                            style={{
+                                flex: 1,
+                                height: '400px',
+                                minWidth: '600px'
+                            }}
+                        >
+                            {!distributionData && (
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    height: '100%',
+                                    color: '#666'
+                                }}>
+                                    请先选择物种和维度
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* 统计信息 */}
+                    {distributionData && (
+                        <div style={{
+                            marginTop: '20px',
+                            padding: '15px',
+                            backgroundColor: hexToRgba(bluePalette.primary, 0.1),
+                            borderRadius: '8px'
+                        }}>
+                            <h4 style={{ color: '#2d3a4b', marginBottom: '10px' }}>统计参数</h4>
+                            <div style={{ display: 'flex', gap: '20px' }}>
+                                <div>
+                                    <span style={{ color: '#666' }}>均值: </span>
+                                    <span style={{ fontWeight: 'bold' }}>
+                                        {distributionData.mean.toFixed(2)}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span style={{ color: '#666' }}>标准差: </span>
+                                    <span style={{ fontWeight: 'bold' }}>
+                                        {distributionData.stdDev.toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* 右侧：饼图 */}
-                <div style={{ ...cardStyle, background: bluePalette.dark }}>
+                <div style={{ ...cardStyle, background: '#f8fbff' }}>
                     <div
                         ref={pieChartRef}
                         style={{
