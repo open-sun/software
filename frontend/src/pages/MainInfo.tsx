@@ -92,7 +92,7 @@ const MainInfo: React.FC = () => {
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
               {videos.length > 0 ? (
                 videos.map((video, index) => (
-                  <Box key={index} sx={{ width: '550px', mb: 2, backgroundColor: '#f5f5f5', padding: 2, borderRadius: '8px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                  <Box key={index} sx={{ width: '300px', mb: 2, backgroundColor: '#f5f5f5', padding: 2, borderRadius: '8px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
                     <Card>
                       <CardMedia
                         component="video"
