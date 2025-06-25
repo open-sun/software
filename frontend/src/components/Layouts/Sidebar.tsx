@@ -19,10 +19,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import UnderwaterIcon from '@mui/icons-material/Water';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import DataUsageIcon from '@mui/icons-material/DataUsage';
-import SearchIcon from '@mui/icons-material/Search';
-import MapIcon from '@mui/icons-material/Map';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
@@ -33,52 +30,52 @@ interface SidebarProps {
 }
 
 const MIN_WIDTH = 56; // 收起时宽度
-const MAX_WIDTH = 400; // 最大宽度
-const DEFAULT_RATIO = 0.18; // 默认占页面宽度比例
-const DEFAULT_WIDTH = Math.round(window.innerWidth * DEFAULT_RATIO);
+const MAX_WIDTH = 400; // 电脑端最大宽度
+const DEFAULT_RATIO = 0.18; // 电脑端默认宽度比例
 
 const Sidebar: React.FC<SidebarProps> = ({ isMobile, mobileOpen, handleDrawerToggle }) => {
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const user = useSelector((state: RootState) => state.auth.user);
 
-  // 用比例和像素双重控制
+  // 电脑端的宽度状态（拖拽可变）
   const [drawerWidth, setDrawerWidth] = useState(() => {
     const w = Math.round(window.innerWidth * DEFAULT_RATIO);
     return Math.max(Math.min(w, MAX_WIDTH), MIN_WIDTH);
   });
+
+  // 手机端和电脑端的收起状态共享
   const [collapsed, setCollapsed] = useState(false);
+
   const dragging = useRef(false);
-  const lastX = useRef(0);
   const animationFrame = useRef<number>(0);
 
-  // 保持宽度与页面成比例
+  // 电脑端：监听窗口变化，调整宽度比例（仅未收起时生效）
   useEffect(() => {
-    const handleResize = () => {
-      if (!collapsed && !dragging.current) {
-        const w = Math.round(window.innerWidth * DEFAULT_RATIO);
-        setDrawerWidth(Math.max(Math.min(w, MAX_WIDTH), MIN_WIDTH));
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [collapsed]);
+    if (!isMobile) {
+      const handleResize = () => {
+        if (!collapsed && !dragging.current) {
+          const w = Math.round(window.innerWidth * DEFAULT_RATIO);
+          setDrawerWidth(Math.max(Math.min(w, MAX_WIDTH), MIN_WIDTH));
+        }
+      };
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, [collapsed, isMobile]);
 
-  // 拖拽事件优化
+  // 电脑端拖拽逻辑
   const handleMouseDown = (e: React.MouseEvent) => {
-    dragging.current = true;
-    lastX.current = e.clientX;
-    document.body.style.cursor = 'col-resize';
+    if (!isMobile && !collapsed) {
+      dragging.current = true;
+      document.body.style.cursor = 'col-resize';
+    }
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (dragging.current && !collapsed) {
-      // 只在鼠标移动时用 requestAnimationFrame 优化性能
-      if (animationFrame.current) {
-        cancelAnimationFrame(animationFrame.current);
-      }
+    if (dragging.current && !collapsed && !isMobile) {
+      if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
       animationFrame.current = requestAnimationFrame(() => {
         let newWidth = e.clientX;
-        // 防止拖到页面外
         if (newWidth < MIN_WIDTH) newWidth = MIN_WIDTH;
         if (newWidth > MAX_WIDTH) newWidth = MAX_WIDTH;
         setDrawerWidth(newWidth);
@@ -87,35 +84,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, mobileOpen, handleDrawerTog
   };
 
   const handleMouseUp = () => {
-    dragging.current = false;
-    document.body.style.cursor = '';
-    if (animationFrame.current) {
-      cancelAnimationFrame(animationFrame.current);
+    if (!isMobile) {
+      dragging.current = false;
+      document.body.style.cursor = '';
+      if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
     }
   };
 
   useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      if (animationFrame.current) {
-        cancelAnimationFrame(animationFrame.current);
-      }
-    };
-    // eslint-disable-next-line
-  }, [collapsed]);
+    if (!isMobile) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+        if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
+      };
+    }
+  }, [collapsed, isMobile]);
 
-  // 收起/展开
+  // 切换收起/展开
   const toggleCollapse = () => {
-    setCollapsed(!collapsed);
-    if (!collapsed) {
-      setDrawerWidth(MIN_WIDTH);
+    if (collapsed) {
+      // 从收起到展开
+      if (isMobile) {
+        // 手机端展开占满全屏
+        setDrawerWidth(window.innerWidth);
+      } else {
+        // 电脑端展开恢复比例宽度
+        const w = Math.round(window.innerWidth * DEFAULT_RATIO);
+        setDrawerWidth(Math.max(Math.min(w, MAX_WIDTH), MIN_WIDTH));
+      }
+      setCollapsed(false);
     } else {
-      // 恢复为当前窗口宽度的比例
-      const w = Math.round(window.innerWidth * DEFAULT_RATIO);
-      setDrawerWidth(Math.max(Math.min(w, MAX_WIDTH), MIN_WIDTH));
+      // 收起时宽度固定最小
+      setDrawerWidth(MIN_WIDTH);
+      setCollapsed(true);
     }
   };
 
@@ -156,27 +160,57 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, mobileOpen, handleDrawerTog
       <List sx={{ flexGrow: 1, overflowY: 'auto', px: collapsed ? 0.5 : 2 }}>
         {isAuthenticated && (
           <>
-            <ListItemButton component={Link} to="/MainInfo" sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}><InfoIcon /></ListItemIcon>
+            <ListItemButton
+              component={Link}
+              to="/MainInfo"
+              sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}
+            >
+              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>
+                <InfoIcon />
+              </ListItemIcon>
               {!collapsed && <ListItemText primary="主要信息" />}
             </ListItemButton>
-            <ListItemButton component={Link} to="/Underwater" sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}><UnderwaterIcon /></ListItemIcon>
+            <ListItemButton
+              component={Link}
+              to="/Underwater"
+              sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}
+            >
+              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>
+                <UnderwaterIcon />
+              </ListItemIcon>
               {!collapsed && <ListItemText primary="水下系统" />}
             </ListItemButton>
-            <ListItemButton component={Link} to="/SmartCenter" sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}><SmartToyIcon /></ListItemIcon>
+            <ListItemButton
+              component={Link}
+              to="/SmartCenter"
+              sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}
+            >
+              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>
+                <SmartToyIcon />
+              </ListItemIcon>
               {!collapsed && <ListItemText primary="智能中心" />}
             </ListItemButton>
-            <ListItemButton component={Link} to="/DataCenter" sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}><DataUsageIcon /></ListItemIcon>
+            <ListItemButton
+              component={Link}
+              to="/DataCenter"
+              sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}
+            >
+              <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>
+                <DataUsageIcon />
+              </ListItemIcon>
               {!collapsed && <ListItemText primary="数据中心" />}
             </ListItemButton>
           </>
         )}
         {user?.role === 'admin' && (
-          <ListItemButton component={Link} to="/AdminCenter" sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}>
-            <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}><AdminPanelSettingsIcon /></ListItemIcon>
+          <ListItemButton
+            component={Link}
+            to="/AdminCenter"
+            sx={{ '&:hover': { backgroundColor: '#34495E' }, justifyContent: collapsed ? 'center' : 'flex-start' }}
+          >
+            <ListItemIcon sx={{ color: '#fff', minWidth: collapsed ? 0 : 40, justifyContent: 'center' }}>
+              <AdminPanelSettingsIcon />
+            </ListItemIcon>
             {!collapsed && <ListItemText primary="管理中心" />}
           </ListItemButton>
         )}
@@ -184,7 +218,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, mobileOpen, handleDrawerTog
     </Box>
   );
 
-  return isMobile ? (
+if (isMobile) {
+  return (
     <Drawer
       variant="temporary"
       open={mobileOpen}
@@ -192,39 +227,32 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, mobileOpen, handleDrawerTog
       ModalProps={{ keepMounted: true }}
       sx={{
         [`& .MuiDrawer-paper`]: {
-          width: drawerWidth,
+          width: '50vw',      // 手机端宽度固定全屏
           backgroundColor: '#2C3E50',
           color: '#fff',
-          transition: 'width 0.2s',
           overflowX: 'hidden',
         },
       }}
     >
-      {/* 收起/展开按钮 */}
-      <Box sx={{ position: 'absolute', top: 10, right: -16, zIndex: 1 }}>
-        <IconButton onClick={toggleCollapse} size="small" sx={{ background: '#34495E', color: '#fff', '&:hover': { background: '#222' } }}>
-          {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+      {/* 这里可以放个关闭按钮 */}
+      <Box sx={{ position: 'absolute', top: 10, right: 10, zIndex: 1 }}>
+        <IconButton
+          onClick={handleDrawerToggle}   // 关闭时调用父组件控制
+          size="small"
+          sx={{ background: '#34495E', color: '#fff', '&:hover': { background: '#222' } }}
+        >
+          <ChevronLeftIcon />
         </IconButton>
       </Box>
-      {/* 拖拽分隔条 */}
-      {!collapsed && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: 6,
-            height: '100%',
-            cursor: 'col-resize',
-            zIndex: 2,
-            background: 'rgba(0,0,0,0.05)',
-          }}
-          onMouseDown={handleMouseDown}
-        />
-      )}
+
       {drawerContent}
     </Drawer>
-  ) : (
+  );
+}
+
+
+  // 电脑端 Drawer，支持拖拽和收起/展开
+  return (
     <Drawer
       variant="permanent"
       sx={{
@@ -232,37 +260,48 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile, mobileOpen, handleDrawerTog
         flexShrink: 0,
         [`& .MuiDrawer-paper`]: {
           width: drawerWidth,
+          maxWidth: '100vw',
           backgroundColor: '#2C3E50',
           color: '#fff',
           boxSizing: 'border-box',
           transition: 'width 0.2s',
           overflowX: 'hidden',
+          position: 'relative',
+          userSelect: dragging.current ? 'none' : 'auto',
         },
       }}
       open
     >
-      {/* 收起/展开按钮 */}
-      <Box sx={{ position: 'absolute', top: 10, right: -16, zIndex: 1 }}>
-        <IconButton onClick={toggleCollapse} size="small" sx={{ background: '#34495E', color: '#fff', '&:hover': { background: '#222' } }}>
-          {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-        </IconButton>
-      </Box>
-      {/* 拖拽分隔条 */}
+      {/* 拖拽条 */}
       {!collapsed && (
         <Box
+          onMouseDown={handleMouseDown}
           sx={{
             position: 'absolute',
             top: 0,
             right: 0,
-            width: 6,
+            width: 8,
             height: '100%',
             cursor: 'col-resize',
-            zIndex: 2,
-            background: 'rgba(0,0,0,0.05)',
+            zIndex: 1000,
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            },
           }}
-          onMouseDown={handleMouseDown}
         />
       )}
+
+      {/* 收起/展开按钮 */}
+      <Box sx={{ position: 'absolute', top: 10, right: 10, zIndex: 1100 }}>
+        <IconButton
+          onClick={toggleCollapse}
+          size="small"
+          sx={{ background: '#34495E', color: '#fff', '&:hover': { background: '#222' } }}
+        >
+          {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+        </IconButton>
+      </Box>
+
       {drawerContent}
     </Drawer>
   );
