@@ -47,3 +47,22 @@ export const sendFileForRecognition = async (file: File) => {
     throw error;
   }
 };
+
+
+export const sendVideoForAnalysis = async (file: File): Promise<Blob> => {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axiosInstance.post("/analyzeVideo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      responseType: "blob", // 非常重要：告诉axios返回二进制流（Blob）
+    });
+
+    return response.data; // 返回Blob对象，代表后端返回的视频文件
+  } catch (error) {
+    throw error;
+  }
+};

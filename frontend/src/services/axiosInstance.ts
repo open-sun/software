@@ -4,7 +4,8 @@ import API_BASE_IP from '../config'; // 根据实际路径调整,在src下添加
 
 
 const axiosInstance = axios.create({
-  baseURL: `${API_BASE_IP}:5000`, // 使用模板字符串拼接端口
+  // baseURL: `${API_BASE_IP}:5000`, // 使用模板字符串拼接端口
+  baseURL: `http://localhost:5000`, // 使用模板字符串拼接端口
 });
 
 export default axiosInstance;

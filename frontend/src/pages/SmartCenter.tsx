@@ -8,6 +8,7 @@ import {
 import AiTalk from '../components/SmartCenter/AiTalk';
 import ImageRecognizer from '../components/SmartCenter/ImageRecognizer';
 import FarmingAdvice from '../components/SmartCenter/FileRecognizer';
+import VideoAnalyzer from '../components/SmartCenter/sendVideoForAnalysis';
 
 // 定义鱼类数据结构
 interface FishData {
@@ -346,9 +347,8 @@ const SmartCenter: React.FC = () => {
           )}
 
           {selectedFeature === '图片识别' && <ImageRecognizer />}
-          {selectedFeature === '运动轨迹追踪' && (
-            <Typography variant="body1">此处为运动轨迹追踪功能的内容展示区域。</Typography>
-          )}
+          {selectedFeature === '运动轨迹追踪' && <VideoAnalyzer/>
+          }
           {selectedFeature === '养殖建议' && <FarmingAdvice />}
         </Box>
       </Box>
