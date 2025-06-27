@@ -6,22 +6,21 @@ import {
   CircularProgress,
   Paper,
 } from "@mui/material";
-import ReactMarkdown from "react-markdown";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
-import { sendVideoForAnalysis } from "../../services/smartcenter"; // 修改为你的视频分析接口路径
+import { sendVideoForAnalysis } from "../../services/smartcenter"; // 发送视频并返回 Blob
 
 const VideoAnalyzer: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [result, setResult] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [result, setResult] = useState<string>("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0] ?? null;
     if (file) {
       setSelectedFile(file);
-      setVideoPreview(URL.createObjectURL(file));
+      setVideoUrl(null); // 清除之前的视频链接
       setResult("");
       setError(null);
     }
@@ -32,23 +31,23 @@ const VideoAnalyzer: React.FC = () => {
 
   setLoading(true);
   setError(null);
-  setResult(""); // 如果你还想显示文本结果的话
+  setResult("");
+  if (videoUrl) {
+    URL.revokeObjectURL(videoUrl);
+    setVideoUrl(null);
+  }
 
   try {
-    const videoBlob = await sendVideoForAnalysis(selectedFile);
-    // 生成视频预览URL
-    const videoUrl = URL.createObjectURL(videoBlob);
-    setVideoPreview(videoUrl);
-
-    // 如果你不需要额外文字结果，这里可以直接留空或者提示
+    const url = await sendVideoForAnalysis(selectedFile);
+    setVideoUrl(url);
     setResult("视频分析完成，已生成分析视频。");
   } catch (err) {
+    console.error(err);
     setError("视频分析失败，请稍后重试。");
   } finally {
     setLoading(false);
   }
 };
-
 
   return (
     <Box sx={{ padding: 2, maxWidth: 700, margin: "0 auto" }}>
@@ -94,14 +93,14 @@ const VideoAnalyzer: React.FC = () => {
           </label>
         </Box>
 
-        {videoPreview && (
+        {videoUrl && (
           <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
             <video
-              src={videoPreview}
+              src={videoUrl}
               controls
               style={{
                 maxWidth: "100%",
-                maxHeight: 300,
+                maxHeight: 360,
                 borderRadius: 8,
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
               }}
@@ -136,7 +135,7 @@ const VideoAnalyzer: React.FC = () => {
             borderRadius: 2,
           }}
         >
-          <ReactMarkdown>{result}</ReactMarkdown>
+          {result}
         </Paper>
       )}
 

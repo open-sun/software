@@ -49,7 +49,7 @@ export const sendFileForRecognition = async (file: File) => {
 };
 
 
-export const sendVideoForAnalysis = async (file: File): Promise<Blob> => {
+export const sendVideoForAnalysis = async (file: File): Promise<string> => {
   try {
     const formData = new FormData();
     formData.append("file", file);
@@ -58,10 +58,11 @@ export const sendVideoForAnalysis = async (file: File): Promise<Blob> => {
       headers: {
         "Content-Type": "multipart/form-data",
       },
-      responseType: "blob", // 非常重要：告诉axios返回二进制流（Blob）
+      // 不需要 responseType: 'blob'，默认json
     });
 
-    return response.data; // 返回Blob对象，代表后端返回的视频文件
+    // 返回视频URL字符串
+    return response.data.video_url;
   } catch (error) {
     throw error;
   }
