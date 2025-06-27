@@ -8,8 +8,9 @@ from deep_sort_realtime.deepsort_tracker import DeepSort
 from ultralytics import YOLO
 import traceback
 import uuid
-
-
+from dotenv import load_dotenv
+load_dotenv()
+baseurl=os.getenv("DB_HOST")
 TEMP_DIR = "./temp"
 os.makedirs(TEMP_DIR, exist_ok=True)  # 确保 temp 目录存在
 
@@ -177,7 +178,8 @@ def analyze_video_route():
 
         # 返回视频的访问URL
         processed_filename = processed_video_path.split(os.sep)[-1]
-        video_url = f"http://localhost:5000/temp/{processed_filename}"
+        # video_url = f"http://localhost:5000/temp/{processed_filename}"
+        video_url = f"http://{baseurl}:5000/temp/{processed_filename}"
 
         return jsonify({"video_url": video_url}), 200
 
