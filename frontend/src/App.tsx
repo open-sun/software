@@ -18,6 +18,7 @@ import LineArea from './pages/LineArea';
 import Dashboard from './pages/DashBoard';
 import Layout from './components/Layouts/Layout';
 import SmartCenter from './pages/SmartCenter';
+import UserProfile from './pages/UserProfile.tsx';
 
 // 新增简单布局（仅包含 Header）
 const AuthLayout = ({ children }: { children: React.ReactNode }) => (
@@ -66,6 +67,7 @@ const App: React.FC = () => {
         <Route path="/SmartCenter" element={<Layout><SmartCenter /></Layout>} />
         <Route path="/WaterQuality" element={<Layout><WaterQuality /></Layout>} />
         <Route path="/LineArea" element={<Layout><LineArea /></Layout>} />
+        <Route path="/UserProfile" element={<Layout><UserProfile /></Layout>} />
       </Routes>
     </Router>
   );
