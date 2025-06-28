@@ -111,3 +111,21 @@ def delete_user(user_id):
         }), 500
 
 
+@auth_bp.route("/api/changepassword", methods=["POST"])
+def change_password():
+    data = request.get_json()
+    username = data.get('username')
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({"ok": False, "message": "用户不存在"}), 404
+
+    if not check_password_hash(user.password, old_password):
+        return jsonify({"ok": False, "message": "旧密码错误"}), 201
+
+    user.password = generate_password_hash(new_password)
+    db.session.commit()
+
+    return jsonify({"ok": True, "message": "密码修改成功"}), 200

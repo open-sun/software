@@ -1,7 +1,11 @@
 import axios from 'axios';
+import API_BASE_IP from '../config'; // 根据实际路径调整,在src下添加config.js文件然后根据自己的ip修改
+
+
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000', // 设置统一的 baseURL，修改为本机的 IP 地址。可通过 ipconfig 命令查看本机 IP 地址
+  baseURL: `${API_BASE_IP}:5000`, // 使用模板字符串拼接端口
+  // baseURL: `http://localhost:5000`, // 使用模板字符串拼接端口
 });
 
 export default axiosInstance;

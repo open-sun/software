@@ -42,7 +42,6 @@ const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, isMobile }) => {
   return (
     <AppBar position="static" sx={{ backgroundColor: '#007bff' }}>
       <Toolbar>
-        {/* 仅在 isMobile 为 true 时显示按钮 */}
         {isMobile && handleDrawerToggle && (
           <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
             <MenuIcon />
@@ -80,7 +79,11 @@ const Header: React.FC<HeaderProps> = ({ handleDrawerToggle, isMobile }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: 'auto' }}>
           {isAuthenticated ? (
             <>
-              <Avatar {...stringAvatar(user?.username || 'U')} />
+              <Avatar
+                {...stringAvatar(user?.username || 'U')}
+                sx={{ cursor: 'pointer', bgcolor: 'white', color: '#007bff' }}
+                onClick={() => navigate('/UserProfile')} // 👈 点击跳转
+              />
               <Typography sx={{ color: 'white', fontSize: '0.875rem' }}>
                 {user?.username || 'Unknown'}
               </Typography>
