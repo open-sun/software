@@ -7,6 +7,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getusers, updateuserrole, deleteuser } from "../../services/usermanagement";
 import { register } from "../../services/login-register";
+import axiosInstance from '../../services/axiosInstance';
 
 interface User {
   id: number;
@@ -19,6 +20,8 @@ const UserManagement: React.FC = () => {
   const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState("user");
+  const [loading, setLoading] = useState(false);  // Add loading state for download
+  const [error, setError] = useState<string | null>(null);  // To handle errors
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -74,6 +77,46 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  const handleDownloadCSV = async () => {
+    setLoading(true);  // Start loading when initiating download
+    setError(null);  // Reset any previous errors
+
+    try {
+      // 请求获取 CSV 文件，确保 responseType 是 blob
+      const response = await axiosInstance.get('/api/exportusers', {
+        responseType: 'blob', // 确保响应类型是 blob
+      });
+
+      // 检查响应状态
+      if (response.status !== 200) {
+        throw new Error("下载失败，服务器返回错误");
+      }
+
+      // 创建一个临时的 URL 对象
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      // 创建一个 <a> 元素并模拟点击下载文件
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "users.csv";  // 设置下载文件的名称
+      document.body.appendChild(a);
+      a.click();
+
+      // 清理 URL 对象
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      // Provide success feedback to user
+      alert("CSV 文件下载成功！");
+
+    } catch (error) {
+      console.error("下载 CSV 失败:", error);
+      setError("下载失败，请重试！");  // Set error message
+    } finally {
+      setLoading(false);  // Stop loading
+    }
+  };
+
   return (
     <Box>
       <Typography variant="h6" sx={{ mb: 2 }}>
@@ -119,6 +162,17 @@ const UserManagement: React.FC = () => {
           添加用户
         </Button>
       </Stack>
+
+      <Button
+        variant="outlined"
+        onClick={handleDownloadCSV}
+        sx={{ mb: 3 }}
+        disabled={loading}  // Disable button during download
+      >
+        {loading ? '下载中...' : '下载用户列表'}
+      </Button>
+
+      {error && <Typography color="error">{error}</Typography>} {/* Show error if exists */}
 
       <TableContainer component={Paper}>
         <Table>
