@@ -1,0 +1,20 @@
+CREATE TABLE water_quality_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    province VARCHAR(255),
+    river_basin VARCHAR(255),
+    section_name VARCHAR(255),
+    monitoring_time VARCHAR(255),
+    water_quality_category VARCHAR(255),
+    temperature DECIMAL(10, 2),
+    ph DECIMAL(10, 2),
+    dissolved_oxygen DECIMAL(10, 2),
+    conductivity DECIMAL(10, 2),
+    turbidity DECIMAL(10, 2),
+    permanganate_index DECIMAL(10, 2),
+    ammonia_nitrogen DECIMAL(10, 3),
+    total_phosphorus DECIMAL(10, 3),
+    total_nitrogen DECIMAL(10, 2),
+    chlorophyll_a DECIMAL(10, 3),
+    algae_density BIGINT,
+    site_status VARCHAR(255)
+);
