@@ -306,12 +306,20 @@ setLoading(false);
   chartInstance.setOption(option);
 };
 
+
   return (
     <Card sx={{ padding: '20px' }}>
       {loading && <LinearProgress variant="determinate" value={progress} sx={{ mb: 2 }} />}
       <h1>水质数据页面</h1>
 
-      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' }, // 移动端改为垂直布局
+          gap: 2,
+          mb: 2,
+        }}
+      >
         <FormControl sx={{ minWidth: 150 }}>
           <InputLabel>省份</InputLabel>
           <Select value={selectedProvince} onChange={(e) => setSelectedProvince(e.target.value)}>

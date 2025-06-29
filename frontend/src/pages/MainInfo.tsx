@@ -29,31 +29,67 @@ const MainInfo: React.FC = () => {
   const DEFAULT_RATIO = 0.18; // 默认占页面宽度比例
 
   return (
-      <Box
-    sx={{
-      p: { xs: 1, sm: 2, md: 4 },
-      background: 'linear-gradient(135deg,rgb(247, 247, 247), #ffffff)',
-      minHeight: '100vh',
-      width: {
-        xs: '100vw',
-        md: `calc(100vw - ${DEFAULT_RATIO * 100}vw)`, // 默认侧栏宽度
-        lg: `calc(100vw - ${MAX_WIDTH}px)`,            // 大屏最大侧栏宽度
-      },
-      maxWidth: 1600,
-      margin: '0 auto',
-      boxSizing: 'border-box',
-      overflowX: 'auto',
-      transition: 'width 0.3s',
-    }}
-  >
+    <Box
+      sx={{
+        p: { xs: 1, sm: 2, md: 4 },
+        background: 'linear-gradient(135deg,rgb(247, 247, 247), #ffffff)',
+        minHeight: '100vh',
+        width: '100vw',
+        maxWidth: { xs: '100%', md: 1600 },
+        margin: '0 auto',
+        boxSizing: 'border-box',
+        overflowX: 'auto',
+        transition: 'width 0.3s',
+      }}
+    >
       {/* 上部分：左侧主要信息，右侧视频模块（查找和展示） */}
-      <Box sx={{ display: 'flex', gap: 4, mb: 4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: { xs: 2, md: 4 },
+          mb: 4,
+        }}
+      >
         {/* 左侧 - 主要信息 */}
-        <Box sx={{ flex: '0 0 60%', backgroundColor: '#ffffff', padding: 3, borderRadius: '12px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', position: 'relative' }}>
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+        <Box
+          sx={{
+            flex: { xs: '1 1 auto', md: '0 0 60%' },
+            backgroundColor: '#ffffff',
+            padding: { xs: 2, md: 3 },
+            borderRadius: '12px',
+            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+            position: 'relative',
+          }}
+        >
+          <Typography
+            variant="h4"
+            component="h1"
+            gutterBottom
+            sx={{
+              fontWeight: 'bold',
+              color: '#1976d2',
+              fontSize: { xs: '1.5rem', md: '2rem' },
+            }}
+          >
             智慧海洋牧场 - 主要信息
           </Typography>
-          <Box sx={{ position: 'absolute', right: '16px', top: '16px', width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#1976d2', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ffffff', fontWeight: 'bold' }}>
+          <Box
+            sx={{
+              position: 'absolute',
+              right: '16px',
+              top: '16px',
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: '#1976d2',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              color: '#ffffff',
+              fontWeight: 'bold',
+            }}
+          >
             i
           </Box>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.6 }}>
@@ -64,11 +100,32 @@ const MainInfo: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* 右侧 - 视频模块（查找和展示）  这个地方其实没对齐 */}
-        <Box sx={{ flex: '0 0 38%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* 右侧 - 视频模块（查找和展示） */}
+        <Box
+          sx={{
+            flex: { xs: '1 1 auto', md: '0 0 38%' },
+            display: 'flex',
+            flexDirection: 'column',
+            gap: { xs: 2, md: 3 },
+          }}
+        >
           {/* 视频查找模块 */}
-          <Box sx={{ backgroundColor: '#ffffff', padding: 3, borderRadius: '12px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
-            <Typography variant="h5" component="h2" gutterBottom>
+          <Box
+            sx={{
+              backgroundColor: '#ffffff',
+              padding: { xs: 2, md: 3 },
+              borderRadius: '12px',
+              boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <Typography
+              variant="h5"
+              component="h2"
+              gutterBottom
+              sx={{
+                fontSize: { xs: '1.25rem', md: '1.5rem' },
+              }}
+            >
               视频查找
             </Typography>
             <TextField
@@ -85,14 +142,40 @@ const MainInfo: React.FC = () => {
           </Box>
 
           {/* 视频展示区 */}
-          <Box sx={{ flex: 1, backgroundColor: '#ffffff', padding: 3, borderRadius: '12px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', overflowY: 'auto' }}>
-            <Typography variant="h6" component="h6" gutterBottom>
+          <Box
+            sx={{
+              flex: 1,
+              backgroundColor: '#ffffff',
+              padding: { xs: 2, md: 3 },
+              borderRadius: '12px',
+              boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+              overflowY: 'auto',
+            }}
+          >
+            <Typography
+              variant="h6"
+              component="h6"
+              gutterBottom
+              sx={{
+                fontSize: { xs: '1rem', md: '1.25rem' },
+              }}
+            >
               视频展示
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'center' }}>
               {videos.length > 0 ? (
                 videos.map((video, index) => (
-                  <Box key={index} sx={{ width: '300px', mb: 2, backgroundColor: '#f5f5f5', padding: 2, borderRadius: '8px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
+                  <Box
+                    key={index}
+                    sx={{
+                      width: '300px',
+                      mb: 2,
+                      backgroundColor: '#f5f5f5',
+                      padding: 2,
+                      borderRadius: '8px',
+                      boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                    }}
+                  >
                     <Card>
                       <CardMedia
                         component="video"
@@ -118,8 +201,23 @@ const MainInfo: React.FC = () => {
       </Box>
 
       {/* 水质数据展示区 */}
-      <Box sx={{ mt: 4, p: 4, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)' }}>
-        <Typography variant="h5" component="h2" gutterBottom>
+      <Box
+        sx={{
+          mt: 4,
+          p: { xs: 2, md: 4 },
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '12px',
+          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
+        }}
+      >
+        <Typography
+          variant="h5"
+          component="h2"
+          gutterBottom
+          sx={{
+            fontSize: { xs: '1.25rem', md: '1.5rem' },
+          }}
+        >
           水质数据可视化
         </Typography>
         <Typography variant="body1" sx={{ mb: 2 }}>
@@ -127,16 +225,23 @@ const MainInfo: React.FC = () => {
         </Typography>
         <WaterQuality />
       </Box>
-      
-      <Box sx={{ display: 'flex', gap: 4, mt: 4 }}>
+
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: { xs: 2, md: 4 },
+          mt: 4,
+        }}
+      >
         {/* 水质地图展示区 */}
         <Box
           sx={{
-            p: 4,
+            p: { xs: 2, md: 4 },
             backgroundColor: 'rgba(255, 255, 255, 0.1)',
             borderRadius: '12px',
             boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
-            width: '50%',
+            width: { xs: '100%', md: '50%' },
           }}
         >
           <MapTest />
@@ -144,21 +249,29 @@ const MainInfo: React.FC = () => {
         {/* 市场信息展示区 */}
         <Box
           sx={{
-            p: 4,
+            p: { xs: 2, md: 4 },
             backgroundColor: 'rgba(255, 255, 255, 0.1)',
             borderRadius: '12px',
             boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
-            width: '50%',
+            width: { xs: '100%', md: '50%' },
           }}
         >
           <MarketPanel />
         </Box>
       </Box>
+
       {/* 天气信息展示区 */}
-      <Box sx={{ mt: 4, p: 4, backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '12px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)' }}>
+      <Box
+        sx={{
+          mt: 4,
+          p: { xs: 2, md: 4 },
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: '12px',
+          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
+        }}
+      >
         <WeatherPanel />
       </Box>
-
     </Box>
   );
 };
