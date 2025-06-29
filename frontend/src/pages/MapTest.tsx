@@ -14,6 +14,18 @@ import { MapChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
 import { getJsonData, getWaterDataByName } from '../services/DataGet'; // 引入服务
 import * as d3 from 'd3-geo';
+import { log } from 'console';
+
+const ALERT_THRESHOLDS: Record<string, (value: number) => boolean> = {
+  'pH(无量纲)': (v: number) => v < 6 || v > 9,
+  '溶解氧(mg/L)': (v: number) => v < 5,
+  '高锰酸盐指数(mg/L)': (v: number) => v > 6,
+  '氨氮(mg/L)': (v: number) => v > 1.0,
+  '总磷(mg/L)': (v: number) => v > 0.1, // 可选：考虑湖泊情况时你可使用更严格的0.05
+  '总氮(mg/L)': (v: number) => v > 1.0,
+};
+
+
 
 // 注册 echarts 组件
 echarts.use([
@@ -87,6 +99,9 @@ const MapTest: React.FC = () => {
   const [filteredFile, setFilteredFile] = useState<any>(null);
   const [selectedColumn, setSelectedColumn] = useState<string>('');
 
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertMessages, setAlertMessages] = useState<string[]>([]);
+
   // 获取可选的指标列（排除指定字段）
   const columnOptions = React.useMemo(() => {
     if (!filteredFile || !filteredFile.thead) return [];
@@ -108,14 +123,14 @@ const MapTest: React.FC = () => {
   }, [columnOptions]);
 
   // 获取所有流域
-const basins = React.useMemo(() => {
-  if (!modalData || !Array.isArray(modalData.files)) return [];
-  return Array.from(new Set(
-    modalData.files.flatMap((f: any) =>
-      Array.isArray(f.tbody) ? f.tbody.map((row: any) => row['流域']) : []
-    )
-  ));
-}, [modalData]);
+  const basins = React.useMemo(() => {
+    if (!modalData || !Array.isArray(modalData.files)) return [];
+    return Array.from(new Set(
+      modalData.files.flatMap((f: any) =>
+        Array.isArray(f.tbody) ? f.tbody.map((row: any) => row['流域']) : []
+      )
+    ));
+  }, [modalData]);
 
   // 获取当前流域下的断面名称
   const sites = React.useMemo(() => {
@@ -149,7 +164,39 @@ const basins = React.useMemo(() => {
       f.path.includes(selectedBasin) && f.path.includes(selectedSite)
     );
     setFilteredFile(file || null);
+
   }, [modalData, selectedBasin, selectedSite]);
+
+  // 计算异常行
+  // 仅在有选中的列和文件时计算异常行
+  const abnormalRows = React.useMemo(() => {
+    console.log('selectedColumn 是否在阈值表中：', selectedColumn in ALERT_THRESHOLDS);
+    if (!filteredFile || !selectedColumn || !ALERT_THRESHOLDS[selectedColumn]) return [];
+
+    console.log('列名检查:', filteredFile?.thead);
+
+    return filteredFile.tbody.filter((row: any) => {
+      const val = Number(row[selectedColumn]);
+      console.log(selectedColumn, val)
+      return !isNaN(val) && ALERT_THRESHOLDS[selectedColumn](val);
+    });
+  }, [filteredFile, selectedColumn]);
+
+  useEffect(() => {
+    if (abnormalRows.length === 0 || !selectedColumn) {
+      setShowAlertModal(false);
+      setAlertMessages([]);
+      return;
+    }
+
+    const messages = abnormalRows.map((row: any) => {
+      return `${row['监测时间']}：${row[selectedColumn]}`;
+    });
+
+    setAlertMessages(messages);
+    setShowAlertModal(true);
+  }, [abnormalRows, selectedColumn]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -160,69 +207,69 @@ const basins = React.useMemo(() => {
         echarts.registerMap('china', usaGeoJson);
         // const projection = d3.geoAlbersUsa(); // 未用到可移除
 
-const chartOption: echarts.EChartsCoreOption = {
-  title: {
-    text: '',
-    left: 'right'
-  },
-  tooltip: {
-    trigger: 'item',
-    showDelay: 0,
-    transitionDuration: 0.2
-  },
-  visualMap: {
-    left: 'right',
-    min: 500000,
-    max: 38000000,
-    inRange: {
-      color: [
-        '#e0f3f8', '#abd9e9', '#74add1', '#4575b4',
-        '#313695', '#fee090', '#fdae61', '#f46d43', '#d73027'
-      ]
-    },
-    text: ['高', '低'],
-    calculable: true
-  },
-  toolbox: {
-    show: true,
-    left: 'left',
-    top: 'top',
-    feature: {
-      dataView: { readOnly: false },
-      restore: {},
-      saveAsImage: {}
-    }
-  },
-  series: [
-    {
-      name: 'china PopEstimates',
-      type: 'map',
-      map: 'china',
-      roam: true, // 支持缩放和拖拽
-      zoom: 1.2,  // 默认放大
-      itemStyle: {
-        borderColor: '#666',
-        borderWidth: 1.2,
-        areaColor: '#f5faff'
-      },
-      emphasis: {
-        label: {
-          show: true,
-          color: '#222',
-          fontWeight: 'bold'
-        },
-        itemStyle: {
-          areaColor: '#ffe082',
-          borderColor: '#ff9800',
-          borderWidth: 2
-        }
-      },
-      data: [
-        // ...你的数据
-      ]
-    }
-  ]
-};
+        const chartOption: echarts.EChartsCoreOption = {
+          title: {
+            text: '',
+            left: 'right'
+          },
+          tooltip: {
+            trigger: 'item',
+            showDelay: 0,
+            transitionDuration: 0.2
+          },
+          visualMap: {
+            left: 'right',
+            min: 500000,
+            max: 38000000,
+            inRange: {
+              color: [
+                '#e0f3f8', '#abd9e9', '#74add1', '#4575b4',
+                '#313695', '#fee090', '#fdae61', '#f46d43', '#d73027'
+              ]
+            },
+            text: ['高', '低'],
+            calculable: true
+          },
+          toolbox: {
+            show: true,
+            left: 'left',
+            top: 'top',
+            feature: {
+              dataView: { readOnly: false },
+              restore: {},
+              saveAsImage: {}
+            }
+          },
+          series: [
+            {
+              name: 'china PopEstimates',
+              type: 'map',
+              map: 'china',
+              roam: true, // 支持缩放和拖拽
+              zoom: 1.2,  // 默认放大
+              itemStyle: {
+                borderColor: '#666',
+                borderWidth: 1.2,
+                areaColor: '#f5faff'
+              },
+              emphasis: {
+                label: {
+                  show: true,
+                  color: '#222',
+                  fontWeight: 'bold'
+                },
+                itemStyle: {
+                  areaColor: '#ffe082',
+                  borderColor: '#ff9800',
+                  borderWidth: 2
+                }
+              },
+              data: [
+                // ...你的数据
+              ]
+            }
+          ]
+        };
         setOption(chartOption);
       } catch (error) {
         console.error('地图加载失败：', error);
@@ -260,6 +307,7 @@ const chartOption: echarts.EChartsCoreOption = {
   };
 
   return (
+
     <div style={{ height: '100vh', width: '100%' }}>
       {option ? (
         <ReactECharts
@@ -286,7 +334,6 @@ const chartOption: echarts.EChartsCoreOption = {
             onClick={e => e.stopPropagation()}
           >
             <h3>水质数据</h3>
-            {/* 下拉框选择 */}
             <div style={styles.selectGroup}>
               <label>
                 流域：
@@ -335,12 +382,65 @@ const chartOption: echarts.EChartsCoreOption = {
                 </select>
               </label>
             </div>
+            {showAlertModal && (
+              <div style={{
+                background: '#fff3e0',
+                border: '1px solid #ffa000',
+                padding: '16px',
+                borderRadius: '8px',
+                marginBottom: '20px',
+                color: '#e65100'
+              }}>
+                <h4>⚠ 异常预警</h4>
+                <p>以下监测数据超出Ⅲ类水质标准（指标：{selectedColumn}）：</p>
+                <ul>
+                  {alertMessages.map((msg, idx) => (
+                    <li key={idx}>{msg}</li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => setShowAlertModal(false)}
+                  style={{
+                    marginTop: '10px',
+                    padding: '6px 12px',
+                    border: 'none',
+                    borderRadius: '6px',
+                    backgroundColor: '#ff9800',
+                    color: 'white',
+                    cursor: 'pointer'
+                  }}
+                >
+                  关闭提示
+                </button>
+              </div>
+            )}
+
             {/* 展示对应文件内容 */}
             {filteredFile ? (
               <div>
                 {filteredFile && selectedColumn && (
                   <div>
-                    <h4>监测时间与 {selectedColumn}</h4>
+                    <h4>监测 {selectedColumn}</h4>
+                    {/* ✅ 插入绿色提示（无异常） */}
+                    {abnormalRows.length === 0 && (
+                      <div style={{
+                        color: '#2e7d32',
+                        backgroundColor: '#e8f5e9',
+                        border: '1px solid #81c784',
+                        padding: '12px',
+                        borderRadius: '6px',
+                        marginBottom: '16px',
+                        fontWeight: 'bold',
+                      }}>
+                        ✅ 当前指标数据全部符合Ⅲ类水质标准，无异常记录。
+                      </div>
+                    )}
+                    {abnormalRows.length > 0 && (
+                      <div style={{ color: 'red', fontWeight: 'bold', marginBottom: '12px' }}>
+                        ⚠ 警告：共检测到 {abnormalRows.length} 条异常数据，当前指标“{selectedColumn}”超过Ⅲ类水质标准！
+                      </div>
+                    )}
+
                     <LineAreaChart
                       data={
                         filteredFile.tbody
