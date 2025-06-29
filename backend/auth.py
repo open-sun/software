@@ -8,6 +8,8 @@ from flask import Response, jsonify, send_file
 from models import User  # 假设你有 User 模型
 from io import StringIO
 import shutil
+from models import WaterQualityData
+from models import FishData
 temp_dir = './temp'
 if not os.path.exists(temp_dir):
     os.makedirs(temp_dir)
@@ -179,3 +181,229 @@ def export_users():
                 os.remove(temp_file_path)
         except PermissionError:
             print(f"PermissionError: Could not delete the file {temp_file_path}")
+
+
+
+
+
+
+@auth_bp.route("/api/addwaterqualitydata", methods=["POST"])
+def add_water_quality_data():
+    data = request.get_json()
+    try:
+        new_data = WaterQualityData(
+            province=data.get("province"),
+            river_basin=data.get("river_basin"),
+            section_name=data.get("section_name"),
+            monitoring_time=data.get("monitoring_time"),
+            water_quality_category=data.get("water_quality_category"),
+            temperature=data.get("temperature"),
+            ph=data.get("ph"),
+            dissolved_oxygen=data.get("dissolved_oxygen"),
+            conductivity=data.get("conductivity"),
+            turbidity=data.get("turbidity"),
+            permanganate_index=data.get("permanganate_index"),
+            ammonia_nitrogen=data.get("ammonia_nitrogen"),
+            total_phosphorus=data.get("total_phosphorus"),
+            total_nitrogen=data.get("total_nitrogen"),
+            chlorophyll_a=data.get("chlorophyll_a"),
+            algae_density=data.get("algae_density"),
+            site_status=data.get("site_status")
+        )
+        db.session.add(new_data)
+        db.session.commit()
+        return jsonify({"ok": True, "message": "水质数据已添加"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "message": str(e)}), 500
+
+
+@auth_bp.route("/api/getwaterqualitydata", methods=["GET"])
+def get_water_quality_data():
+    try:
+        # 获取分页参数，默认为第1页，每页20条数据
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+
+        # 确保分页参数有效
+        if page < 1 or per_page < 1:
+            raise ValueError("页码和每页数据条数必须大于0")
+
+        # 查询并分页
+        data = WaterQualityData.query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        # 数据转换
+        data_list = [{
+            "id": item.id,
+            "province": item.province,
+            "river_basin": item.river_basin,
+            "section_name": item.section_name,
+            "monitoring_time": item.monitoring_time,
+            "water_quality_category": item.water_quality_category,
+            "temperature": item.temperature,
+            "ph": item.ph,
+            "dissolved_oxygen": item.dissolved_oxygen,
+            "conductivity": item.conductivity,
+            "turbidity": item.turbidity,
+            "permanganate_index": item.permanganate_index,
+            "ammonia_nitrogen": item.ammonia_nitrogen,
+            "total_phosphorus": item.total_phosphorus,
+            "total_nitrogen": item.total_nitrogen,
+            "chlorophyll_a": item.chlorophyll_a,
+            "algae_density": item.algae_density,
+            "site_status": item.site_status
+        } for item in data.items]
+
+        # 返回分页数据及总条数
+        return jsonify({
+            "data": data_list,
+            "totalCount": data.total
+        }), 200
+
+    except Exception as e:
+        # 打印具体错误信息用于调试
+        print(f"Error: {str(e)}")
+        return jsonify({"ok": False, "message": f"服务器错误: {str(e)}"}), 500
+
+
+
+
+
+@auth_bp.route("/api/updatewaterqualitydata/<int:data_id>", methods=["PUT"])
+def update_water_quality_data(data_id):
+    data = request.get_json()
+    try:
+        water_data = WaterQualityData.query.get(data_id)
+        if not water_data:
+            return jsonify({"ok": False, "message": "数据不存在"}), 404
+
+        water_data.province = data.get("province", water_data.province)
+        water_data.river_basin = data.get("river_basin", water_data.river_basin)
+        water_data.section_name = data.get("section_name", water_data.section_name)
+        water_data.monitoring_time = data.get("monitoring_time", water_data.monitoring_time)
+        water_data.water_quality_category = data.get("water_quality_category", water_data.water_quality_category)
+        # Update other fields similarly...
+
+        db.session.commit()
+        return jsonify({"ok": True, "message": "水质数据已更新"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "message": str(e)}), 500
+
+
+@auth_bp.route("/api/deletewaterqualitydata/<int:data_id>", methods=["DELETE"])
+def delete_water_quality_data(data_id):
+    try:
+        water_data = WaterQualityData.query.get(data_id)
+        if water_data:
+            db.session.delete(water_data)
+            db.session.commit()
+            return jsonify({"ok": True, "message": "水质数据已删除"}), 200
+        else:
+            return jsonify({"ok": False, "message": "数据不存在"}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "message": str(e)}), 500
+
+
+
+
+# 添加鱼类数据
+@auth_bp.route("/api/addfishdata", methods=["POST"])
+def add_fish_data():
+    data = request.get_json()
+    try:
+        new_data = FishData(
+            species=data.get("species"),
+            weight=data.get("weight"),
+            length1=data.get("length1"),
+            length2=data.get("length2"),
+            length3=data.get("length3"),
+            height=data.get("height"),
+            width=data.get("width")
+        )
+        db.session.add(new_data)
+        db.session.commit()
+        return jsonify({"ok": True, "message": "鱼类数据已添加"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "message": str(e)}), 500
+
+
+# 获取鱼类数据（支持分页）
+@auth_bp.route("/api/getfishdata", methods=["GET"])
+def get_fish_data():
+    try:
+        # 获取分页参数，默认为第1页，每页20条数据
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+
+        # 确保分页参数有效
+        if page < 1 or per_page < 1:
+            raise ValueError("页码和每页数据条数必须大于0")
+
+        # 查询并分页
+        data = FishData.query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        # 数据转换
+        data_list = [{
+            "id": item.id,
+            "species": item.species,
+            "weight": item.weight,
+            "length1": item.length1,
+            "length2": item.length2,
+            "length3": item.length3,
+            "height": item.height,
+            "width": item.width
+        } for item in data.items]
+
+        # 返回分页数据及总条数
+        return jsonify({
+            "data": data_list,
+            "totalCount": data.total
+        }), 200
+
+    except Exception as e:
+        # 打印具体错误信息用于调试
+        print(f"Error: {str(e)}")
+        return jsonify({"ok": False, "message": f"服务器错误: {str(e)}"}), 500
+
+
+# 更新鱼类数据
+@auth_bp.route("/api/updatefishdata/<int:data_id>", methods=["PUT"])
+def update_fish_data(data_id):
+    data = request.get_json()
+    try:
+        fish_data = FishData.query.get(data_id)
+        if not fish_data:
+            return jsonify({"ok": False, "message": "数据不存在"}), 404
+
+        fish_data.species = data.get("species", fish_data.species)
+        fish_data.weight = data.get("weight", fish_data.weight)
+        fish_data.length1 = data.get("length1", fish_data.length1)
+        fish_data.length2 = data.get("length2", fish_data.length2)
+        fish_data.length3 = data.get("length3", fish_data.length3)
+        fish_data.height = data.get("height", fish_data.height)
+        fish_data.width = data.get("width", fish_data.width)
+
+        db.session.commit()
+        return jsonify({"ok": True, "message": "鱼类数据已更新"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "message": str(e)}), 500
+
+
+# 删除鱼类数据
+@auth_bp.route("/api/deletefishdata/<int:data_id>", methods=["DELETE"])
+def delete_fish_data(data_id):
+    try:
+        fish_data = FishData.query.get(data_id)
+        if fish_data:
+            db.session.delete(fish_data)
+            db.session.commit()
+            return jsonify({"ok": True, "message": "鱼类数据已删除"}), 200
+        else:
+            return jsonify({"ok": False, "message": "数据不存在"}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"ok": False, "message": str(e)}), 500
