@@ -38,10 +38,27 @@ npm start
 
 ## 结构讲解
 ```bash
+
 ├── backend
-│   ├── app.py
-│   ├── models.py # 数据库模型定义
-│   ├── requirements.txt # 后端依赖
+│   ├── app.py              # 后端主程序入口
+│   ├── models.py           # 数据库模型定义
+│   ├── requirements.txt    # 后端依赖
+│   ├── config.py           # 配置文件（数据库连接、环境变量等）
+│   ├── auth.py             # 用户认证相关逻辑
+│   ├── fish_data.py        # 鱼类数据处理模块
+│   ├── import_data.py      # 数据导入模块
+│   ├── market.py           # 市场数据处理模块
+│   ├── video_data.py       # 视频数据处理模块
+│   ├── water_data.py       # 水质数据处理模块
+│   ├── weather_data.py     # 天气数据处理模块
+│   ├── flask.sql           # Flask 数据库文件
+│   ├── water_quality_data.sql # 水质评价指标数据库文件
+│   ├── yolov8m.pt          # YOLOv8 模型权重文件
+│   ├── ai_tools.py         # AI 工具模块
+│   ├── SmartAI.py          # 智能 AI 相关逻辑
+│   ├── Old/                # 旧版代码存档
+│   ├── data/               # 数据文件目录
+│   ├── temp/               # 临时文件目录
 ├── doc/             # 项目文档目录
 │   ├── 前端/        # 前端文档：结构说明、组件说明
 │   ├── 后端/        # 后端文档：结构说明、接口文档
@@ -70,6 +87,7 @@ npm start
 │   │   │   ├── MarketDataTable.tsx
 │   │   │   ├── RainfallChart.tsx
 │   │   │   ├── Sidebar.tsx
+│   │   │   ├── ......
 │   │   │   └── WeatherCard.tsx
 │   │   ├── pages # 页面组件
 │   │   │   ├── dashboard.tsx
