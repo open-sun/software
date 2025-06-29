@@ -1095,84 +1095,95 @@ const UnderwaterSystem: React.FC = () => {
                     <h3 style={{ color: '#2d3a4b', marginBottom: '15px' }}>分布分析</h3>
 
                     {/* 物种选择按钮行 */}
-                    <div style={{
+                    <div
+                      style={{
                         display: 'flex',
-                        gap: '10px',
                         flexWrap: 'wrap',
-                        marginBottom: '20px'
-                    }}>
-                        {Object.keys(groupedData).map((species, index) => (
-                            <button
-                                key={species}
-                                onClick={() => handleSpeciesSelect(species)}
-                                style={{
-                                    padding: '6px 12px',
-                                    backgroundColor: selectedSpeciesForDistribution === species
-                                        ? SPECIES_COLORS[index % SPECIES_COLORS.length]
-                                        : hexToRgba(SPECIES_COLORS[index % SPECIES_COLORS.length], 0.1),
-                                    color: selectedSpeciesForDistribution === species ? 'white' : '#2d3a4b',
-                                    borderRadius: '20px',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                {species}
-                            </button>
-                        ))}
+                        gap: '10px',
+                        marginBottom: '20px',
+                        justifyContent: 'center', // 添加居中对齐
+                      }}
+                    >
+                      {Object.keys(groupedData).map((species, index) => (
+                        <button
+                          key={species}
+                          onClick={() => handleSpeciesSelect(species)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor:
+                              selectedSpeciesForDistribution === species
+                                ? SPECIES_COLORS[index % SPECIES_COLORS.length]
+                                : hexToRgba(SPECIES_COLORS[index % SPECIES_COLORS.length], 0.1),
+                            color: selectedSpeciesForDistribution === species ? 'white' : '#2d3a4b',
+                            borderRadius: '20px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)', // 添加阴影效果
+                          }}
+                        >
+                          {species}
+                        </button>
+                      ))}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '20px' }}>
-                        {/* 维度选择侧边栏 */}
-                        <div style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '8px',
-                            minWidth: '120px'
-                        }}>
-                            {DIMENSIONS.map(dim => (
-                                <button
-                                    key={dim}
-                                    onClick={() => handleDimensionSelect(dim)}
-                                    style={{
-                                        padding: '8px',
-                                        textAlign: 'left',
-                                        backgroundColor: selectedDimension === dim
-                                            ? bluePalette.primary
-                                            : hexToRgba(bluePalette.primary, 0.1),
-                                        color: selectedDimension === dim ? 'white' : '#2d3a4b',
-                                        borderRadius: '8px',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s'
-                                    }}
-                                >
-                                    {dim}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* 分布图表 */}
-                        <div
-                            ref={distributionChartRef}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      {/* 维度选择侧边栏 */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '10px',
+                          justifyContent: 'center', // 居中对齐
+                        }}
+                      >
+                        {DIMENSIONS.map((dim) => (
+                          <button
+                            key={dim}
+                            onClick={() => handleDimensionSelect(dim)}
                             style={{
-                                flex: 1,
-                                height: '400px',
-                                minWidth: '600px'
+                              padding: '8px',
+                              textAlign: 'center',
+                              backgroundColor: selectedDimension === dim
+                                ? bluePalette.primary
+                                : hexToRgba(bluePalette.primary, 0.1),
+                              color: selectedDimension === dim ? 'white' : '#2d3a4b',
+                              borderRadius: '8px',
+                              border: 'none',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
                             }}
-                        >
-                            {!distributionData && (
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    height: '100%',
-                                    color: '#666'
-                                }}>
-                                    请先选择物种和维度
-                                </div>
-                            )}
-                        </div>
+                          >
+                            {dim}
+                          </button>
+                        ))}
+                      </div>
+                    
+                      {/* 分布图表 */}
+                      <div
+                        ref={distributionChartRef}
+                        style={{
+                          flex: 1,
+                          height: '400px',
+                          minWidth: '600px',
+                          borderRadius: '8px',
+                          backgroundColor: '#f5f5f5',
+                        }}
+                      >
+                        {!distributionData && (
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              height: '100%',
+                              color: '#666',
+                            }}
+                          >
+                            请先选择物种和维度
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* 统计信息 */}
