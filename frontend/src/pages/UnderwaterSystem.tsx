@@ -20,6 +20,9 @@ import type {
     GaugeSeriesOption,
     LineSeriesOption
 } from 'echarts';
+import { Layout, Card, Row, Col, Button, Select, Typography, Divider, Tag, Tooltip, Upload, message, Modal, Space } from 'antd';
+import { UploadOutlined, DownloadOutlined, ReloadOutlined, CloudServerOutlined, DeleteOutlined } from '@ant-design/icons';
+import type { UploadProps } from 'antd';
 
 // 注册必须的组件
 echarts.use([
@@ -93,6 +96,7 @@ interface ApiResponse {
     tbody: FishData[];
     thead: string[];
     total: number;
+    from_cache: boolean;
 }
 
 interface ProcessedFishData {
@@ -141,6 +145,13 @@ const darkenColor = (hex: string, percent: number): string => {
     return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
 };
 
+// 添加缓存状态接口
+interface CacheStatus {
+    has_cache: boolean;
+    cache_timestamp: string | null;
+    rows_count: number;
+}
+
 const UnderwaterSystem: React.FC = () => {
     const [processedData, setProcessedData] = useState<ProcessedFishData[]>([]);
     const [groupedData, setGroupedData] = useState<GroupedFishData>({});
@@ -149,6 +160,17 @@ const UnderwaterSystem: React.FC = () => {
     const [selectedDimension, setSelectedDimension] = useState<string>('Weight(g)');
     const [selectedSpeciesForDistribution, setSelectedSpeciesForDistribution] = useState<string>('');
     const [distributionData, setDistributionData] = useState<DistributionData | null>(null);
+
+    // 添加缓存相关状态
+    const [cacheStatus, setCacheStatus] = useState<CacheStatus>({
+        has_cache: false,
+        cache_timestamp: null,
+        rows_count: 0
+    });
+    const [isUsingCache, setIsUsingCache] = useState<boolean>(false);
+    const [uploadModalVisible, setUploadModalVisible] = useState<boolean>(false);
+    const [fileList, setFileList] = useState<any[]>([]);
+    const [uploading, setUploading] = useState<boolean>(false);
 
     const pieChartRef = useRef<HTMLDivElement>(null);
     const radarChartRef = useRef<HTMLDivElement>(null);
@@ -250,7 +272,48 @@ const UnderwaterSystem: React.FC = () => {
         return { mean, stdDev, points };
     };
 
-    // 数据获取（修改后）
+    // 获取缓存状态
+    const fetchCacheStatus = useCallback(async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/fishdata/cache/status');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const status = await response.json();
+            setCacheStatus(status);
+            
+            // 如果有缓存，默认使用缓存数据
+            if (status.has_cache) {
+                setIsUsingCache(true);
+            }
+        } catch (error) {
+            console.error('获取缓存状态失败:', error);
+        }
+    }, []);
+
+    // 清除缓存
+    const clearCache = useCallback(async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/fishdata/cache/clear', {
+                method: 'POST',
+            });
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const result = await response.json();
+            if (result.result === 1) {
+                message.success('缓存已成功清除');
+                fetchCacheStatus();
+                setIsUsingCache(false);
+                // 重新获取原始数据
+                fetchFishData();
+            }
+        } catch (error) {
+            console.error('清除缓存失败:', error);
+            message.error('清除缓存失败');
+        }
+    }, []);
+
+    // 修改数据获取函数
     const fetchFishData = useCallback(async () => {
         try {
             const response = await fetch('http://localhost:5000/api/fishdata');
@@ -259,7 +322,14 @@ const UnderwaterSystem: React.FC = () => {
             const data: ApiResponse = await response.json();
 
             if (data.result !== 1) console.error('Result code异常');
-            if (data.total !== 159) console.warn('数据总数不符');
+            
+            // 检查数据是否来自缓存
+            if (data.from_cache) {
+                setIsUsingCache(true);
+                message.info('正在使用缓存数据');
+            } else {
+                setIsUsingCache(false);
+            }
 
             const cleanedData = processRawData(data.tbody);
             const grouped = groupBySpecies(cleanedData);
@@ -272,19 +342,102 @@ const UnderwaterSystem: React.FC = () => {
             setSelectedSpecies(initialSpecies);
             setSelectedSpeciesForDistribution(initialSpecies);
 
-            // 生成初始分布数据（使用本地grouped变量）
+            // 生成初始分布数据
             if (initialSpecies) {
                 const initialData = generateNormalDistributionData(
                     initialSpecies,
                     'Weight(g)',
-                    grouped  // 传入本地处理的分组数据
+                    grouped
                 );
                 setDistributionData(initialData);
             }
+            
+            // 更新缓存状态
+            fetchCacheStatus();
         } catch (error) {
             console.error('数据获取失败:', error);
+            message.error('数据获取失败');
         }
-    }, [processRawData, groupBySpecies]);
+    }, [processRawData, groupBySpecies, fetchCacheStatus]);
+
+    // 文件上传处理
+    const handleUpload = async () => {
+        if (fileList.length === 0) {
+            message.error('请先选择文件');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileList[0]);
+        
+        setUploading(true);
+
+        try {
+            const response = await fetch('http://localhost:5000/api/fishdata/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.result === 1) {
+                message.success(`上传成功，共${result.total}条数据`);
+                setFileList([]);
+                setUploadModalVisible(false);
+                
+                // 重新获取数据和缓存状态
+                fetchFishData();
+                fetchCacheStatus();
+            }
+        } catch (error) {
+            console.error('上传失败:', error);
+            message.error(`上传失败: ${error instanceof Error ? error.message : '未知错误'}`);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    // 文件下载处理
+    const handleDownload = () => {
+        // 创建一个隐藏的a标签用于下载
+        const a = document.createElement('a');
+        a.href = `http://localhost:5000/api/fishdata/download?use_cache=${isUsingCache}`;
+        a.download = isUsingCache ? 'fish_data_cache.csv' : 'Fish.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        message.success(`正在下载${isUsingCache ? '缓存' : '原始'}数据`);
+    };
+
+    // 上传组件属性
+    const uploadProps: UploadProps = {
+        onRemove: file => {
+            setFileList([]);
+        },
+        beforeUpload: file => {
+            // 验证文件类型
+            if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+                message.error('只能上传CSV文件!');
+                return Upload.LIST_IGNORE;
+            }
+            
+            setFileList([file]);
+            return false;
+        },
+        fileList,
+    };
+
+    // 初始化
+    useEffect(() => {
+        fetchFishData();
+        fetchCacheStatus();
+    }, [fetchFishData, fetchCacheStatus]);
 
     // 处理维度选择
     const handleDimensionSelect = (dimension: string) => {
@@ -646,10 +799,6 @@ const UnderwaterSystem: React.FC = () => {
         };
     }, [selectedSpecies, groupedData]);
 
-    useEffect(() => {
-        fetchFishData();
-    }, [fetchFishData]);
-
     // 获取物种颜色
     const getSpeciesColor = (species: string): string => {
         const index = Object.keys(groupedData).indexOf(species);
@@ -687,24 +836,122 @@ const UnderwaterSystem: React.FC = () => {
         return '中性';
     };
 
-    return (
-        <div className="underwater-system" style={{
-            padding: '20px',
-            maxWidth: '1400px',
-            margin: '0 auto',
-            background: bluePalette.gradient,
-            minHeight: '100vh'
-        }}>
-            <h2 style={{
-                textAlign: 'center',
-                color: '#2d3a4b',
-                marginBottom: '30px',
-                fontSize: '2.5rem',
-                textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
-            }}>
-                水下生态系统监测平台
-            </h2>
+    // 添加数据管理组件
+    const renderDataManagement = () => (
+        <Card title="数据管理" style={{ ...cardStyle, marginBottom: '20px' }}>
+            <Row gutter={[16, 16]}>
+                <Col span={24}>
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <Typography.Text strong>数据源状态: </Typography.Text>
+                                {isUsingCache ? (
+                                    <Tag color="blue" icon={<CloudServerOutlined />}>使用缓存数据</Tag>
+                                ) : (
+                                    <Tag color="green">使用原始数据</Tag>
+                                )}
+                            </div>
+                            <Button 
+                                type="primary" 
+                                icon={<ReloadOutlined />} 
+                                onClick={fetchFishData}
+                            >
+                                刷新数据
+                            </Button>
+                        </div>
+                        
+                        {cacheStatus.has_cache && (
+                            <div>
+                                <Typography.Text type="secondary">
+                                    缓存时间: {new Date(cacheStatus.cache_timestamp || '').toLocaleString()}
+                                </Typography.Text>
+                                <br />
+                                <Typography.Text type="secondary">
+                                    缓存数据量: {cacheStatus.rows_count} 条
+                                </Typography.Text>
+                            </div>
+                        )}
+                        
+                        <Divider style={{ margin: '12px 0' }} />
+                        
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Space>
+                                <Button 
+                                    type="primary" 
+                                    icon={<UploadOutlined />}
+                                    onClick={() => setUploadModalVisible(true)}
+                                >
+                                    上传数据
+                                </Button>
+                                <Button 
+                                    icon={<DownloadOutlined />}
+                                    onClick={handleDownload}
+                                >
+                                    下载{isUsingCache ? '缓存' : '原始'}数据
+                                </Button>
+                            </Space>
+                            
+                            {cacheStatus.has_cache && (
+                                <Tooltip title="清除缓存，恢复使用原始数据">
+                                    <Button 
+                                        danger 
+                                        icon={<DeleteOutlined />}
+                                        onClick={clearCache}
+                                    >
+                                        清除缓存
+                                    </Button>
+                                </Tooltip>
+                            )}
+                        </div>
+                    </Space>
+                </Col>
+            </Row>
+            
+            {/* 上传模态框 */}
+            <Modal
+                title="上传数据文件"
+                open={uploadModalVisible}
+                onCancel={() => {
+                    setUploadModalVisible(false);
+                    setFileList([]);
+                }}
+                footer={[
+                    <Button key="back" onClick={() => {
+                        setUploadModalVisible(false);
+                        setFileList([]);
+                    }}>
+                        取消
+                    </Button>,
+                    <Button
+                        key="submit"
+                        type="primary"
+                        loading={uploading}
+                        onClick={handleUpload}
+                    >
+                        上传
+                    </Button>,
+                ]}
+            >
+                <Typography.Paragraph>
+                    请上传CSV格式的鱼类数据文件，文件必须包含以下字段：
+                    Species, Weight(g), Length1(cm), Length2(cm), Length3(cm), Height(cm), Width(cm)
+                </Typography.Paragraph>
+                <Upload {...uploadProps}>
+                    <Button icon={<UploadOutlined />}>选择文件</Button>
+                </Upload>
+            </Modal>
+        </Card>
+    );
 
+    return (
+        <div style={{ padding: '20px', backgroundColor: '#f0f2f5', minHeight: '100vh' }}>
+            <Typography.Title level={2} style={{ textAlign: 'center', marginBottom: '30px' }}>
+                水下生态系统监测
+            </Typography.Title>
+
+            {/* 添加数据管理组件 */}
+            {renderDataManagement()}
+            
             {/* 第一行布局 */}
             <div style={{
                 display: 'grid',
